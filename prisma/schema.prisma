@@ -36,6 +36,7 @@ model User {
   // NextAuth
   accounts Account[]
   sessions Session[]
+emailVerified DateTime?
 }
 
 model Team {
