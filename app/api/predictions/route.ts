@@ -16,6 +16,8 @@ export async function GET() {
   });
   const preds = await prisma.prediction.findMany({ where: { userId: user.id } });
   const byMatch = Object.fromEntries(preds.map((p) => [p.matchId, p]));
+  const pays = await prisma.phasePayment.findMany({ where: { userId: user.id, paid: true } });
+  const paidPhases = new Set(pays.map((p) => p.phase));
 
   const now = new Date();
   return NextResponse.json({
@@ -24,7 +26,9 @@ export async function GET() {
       home: m.home, away: m.away,
       kickoff: m.kickoff, status: m.status,
       homeScore: m.homeScore, awayScore: m.awayScore,
-      open: isPredictionOpen({ status: m.status, kickoff: m.kickoff }, now),
+      phase: m.phase,
+      paidPhase: m.phase ? paidPhases.has(m.phase) : false,
+      open: isPredictionOpen({ status: m.status, kickoff: m.kickoff }, now) && (m.phase ? paidPhases.has(m.phase) : false),
       prediction: byMatch[m.id]
         ? { homeScore: byMatch[m.id].homeScore, awayScore: byMatch[m.id].awayScore, advancingCode: byMatch[m.id].advancingCode, points: byMatch[m.id].points }
         : null,
@@ -48,12 +52,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
 
-  // Bloqueo: solo pueden predecir quienes pagaron el aporte (confirmado por el admin).
-  const me = await prisma.user.findUnique({ where: { id: user.id }, select: { hasPaid: true } });
-  if (!me?.hasPaid) return NextResponse.json({ error: 'Tu aporte está pendiente. Podrás predecir cuando el organizador confirme tu pago.' }, { status: 403 });
-
   const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match) return NextResponse.json({ error: 'Partido no existe' }, { status: 404 });
+
+  // Bloqueo: debe haber pagado la fase de este partido.
+  if (match.phase) {
+    const pay = await prisma.phasePayment.findUnique({ where: { userId_phase: { userId: user.id, phase: match.phase } } });
+    if (!pay?.paid) return NextResponse.json({ error: 'Aún no has pagado esta fase. Cuando el organizador confirme tu pago podrás pronosticar.' }, { status: 403 });
+  }
 
   // BLOQUEO en el servidor: nunca confiar solo en el frontend
   if (!isPredictionOpen({ status: match.status, kickoff: match.kickoff })) {

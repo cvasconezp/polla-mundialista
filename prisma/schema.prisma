@@ -21,22 +21,35 @@ enum Stage {
   KNOCKOUT
 }
 
+enum Phase {
+  GROUP
+  R32
+  R16
+  QF
+  SF
+  THIRD
+  FINAL
+}
+
 model User {
-  id           String       @id @default(cuid())
-  email        String       @unique
-  name         String?
-  image        String?
-  isAdmin      Boolean      @default(false)
-  hasPaid      Boolean      @default(false)
-  paidAmount   Float        @default(0)
-  championPick String?      // código del equipo (ej. "ARG")
-  createdAt    DateTime     @default(now())
-  predictions  Prediction[]
+  id            String         @id @default(cuid())
+  email         String         @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  phone         String?        // WhatsApp
+  isAdmin       Boolean        @default(false)
+  hasPaid       Boolean        @default(false) // legacy
+  paidAmount    Float          @default(0)     // legacy
+  championPick  String?        // legacy (v1)
+  createdAt     DateTime       @default(now())
+  predictions   Prediction[]
+  phasePayments PhasePayment[]
+  championPicks ChampionPick[]
 
   // NextAuth
   accounts Account[]
   sessions Session[]
-emailVerified DateTime?
 }
 
 model Team {
@@ -51,6 +64,7 @@ model Match {
   id            Int          @id @default(autoincrement())
   externalId    Int?         @unique // id en football-data.org
   stage         Stage        @default(GROUP)
+  phase         Phase?       // fase del torneo (para tablas/pagos)
   group         String?      // "A", "B", ... (solo fase de grupos)
   homeCode      String
   awayCode      String
@@ -81,11 +95,39 @@ model Prediction {
   @@unique([userId, matchId])
 }
 
+// Pago por fase (cada jugador paga $5 por fase: $1 admin, $4 al bote)
+model PhasePayment {
+  id         Int      @id @default(autoincrement())
+  userId     String
+  phase      Phase
+  paid       Boolean  @default(true)
+  amount     Float    @default(5)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, phase])
+}
+
+// Pick de campeón por fase (para el bono escalonado 50/25/10/5/0)
+model ChampionPick {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  phase     Phase
+  teamCode  String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, phase])
+}
+
 model Settings {
   id             Int     @id @default(1)
   tournamentName String  @default("Polla Mundialista 2026")
   currency       String  @default("USD")
-  entryFee       Float   @default(10)
+  entryFee       Float   @default(5)
+  adminFee       Float   @default(1)
+  phaseShare     Float   @default(0.6)
+  generalShare   Float   @default(0.4)
   ptsExact       Int     @default(5)
   ptsDiff        Int     @default(3)
   ptsWinner      Int     @default(1)

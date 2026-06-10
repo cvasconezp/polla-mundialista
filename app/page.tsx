@@ -11,7 +11,7 @@ type Match = {
   home: { code: string; name: string; flag: string };
   away: { code: string; name: string; flag: string };
   kickoff: string; status: string; homeScore: number | null; awayScore: number | null;
-  open: boolean; prediction: { homeScore: number; awayScore: number; points: number | null } | null;
+  phase: string | null; paidPhase: boolean; open: boolean; prediction: { homeScore: number; awayScore: number; points: number | null } | null;
 };
 
 const TZ = 'America/Guayaquil';
@@ -35,22 +35,21 @@ export default function Home() {
       const [p, lb] = await Promise.all([api('/api/predictions'), api('/api/leaderboard')]);
       setMatches(p.matches);
       const myId = (session?.user as any)?.id;
-      const idx = lb.standings.findIndex((s: any) => s.userId === myId);
-      const mine = idx >= 0 ? lb.standings[idx] : null;
-      setHead({ pot: lb.pot, currency: lb.currency, myPts: mine?.points ?? 0, myRank: mine ? '#' + (idx + 1) : '—' });
+      const g = lb.general?.standings ?? [];
+      const idx = g.findIndex((s: any) => s.userId === myId);
+      const pot = Math.round(((lb.money?.totalCollected ?? 0) - (lb.money?.adminTotal ?? 0)) * 100) / 100;
+      setHead({ pot, currency: lb.currency ?? 'USD', myPts: idx >= 0 ? g[idx].points : 0, myRank: idx >= 0 ? '#' + (idx + 1) : '—' });
     } catch {} finally { setLoading(false); }
   }, [session]);
   useEffect(() => { if (status === 'authenticated') load(); }, [status, load]);
 
   async function save(m: Match, h: string, a: string) {
-    if (h === '' || a === '' || !paid) return;
+    if (h === '' || a === '' || !m.paidPhase) return;
     try {
       await api('/api/predictions', { method: 'POST', body: JSON.stringify({ matchId: m.id, homeScore: +h, awayScore: +a }) });
       setHint(m.id); setTimeout(() => setHint(null), 1200);
     } catch (e: any) { alert(e.message); load(); }
   }
-
-  const paid = (session?.user as any)?.hasPaid;
 
   if (status === 'unauthenticated') return <Landing />;
   if (status !== 'authenticated' || loading) return <Shell head={head}><div className="spinner">Cargando…</div></Shell>;
@@ -63,9 +62,9 @@ export default function Home() {
         📅 Suscribir calendario (horarios + alertas)
       </button>
       {calOpen && <CalModal onClose={() => setCalOpen(false)} />}
-      {!paid && (
+      {matches.some((m) => m.status === 'SCHEDULED' && !m.paidPhase) && (
         <div className="pay-banner">
-          🔒 <b>Tu aporte está pendiente.</b> Podrás cargar tus pronósticos cuando el organizador confirme tu pago. Mientras tanto puedes ver los partidos y elegir tu campeón.
+          🔒 <b>Tienes fases sin pagar.</b> Cada fase cuesta $5. Podrás pronosticar los partidos de una fase cuando el organizador confirme tu pago de esa fase.
         </div>
       )}
       {matches.map((m) => {
@@ -74,7 +73,9 @@ export default function Home() {
           ? <span className="badge lock">🔒 Finalizado</span>
           : m.status === 'LIVE'
             ? <span className="badge live">🔴 En juego · cerrado</span>
-            : <span className="badge">🕑 {fmtTime(m.kickoff)} · abierto</span>;
+            : !m.paidPhase
+              ? <span className="badge lock">🔒 Paga la fase</span>
+              : <span className="badge">🕑 {fmtTime(m.kickoff)} · abierto</span>;
         const pred = m.prediction;
         return (
           <div key={m.id}>
@@ -83,10 +84,10 @@ export default function Home() {
               <div className="meta"><span>Partido {m.id}</span>{badge}</div>
               <div className="row">
                 <div className="team"><img className="flag" src={flagUrl(m.home.flag)} alt={m.home.name} loading="lazy" /><span>{m.home.name}</span></div>
-                <ScoreBox def={pred?.homeScore} disabled={!m.open || !paid}
+                <ScoreBox def={pred?.homeScore} disabled={!m.open}
                   onSave={(v, other) => save(m, v, other)} pairId={`${m.id}`} side="h" />
                 <span className="vs">vs</span>
-                <ScoreBox def={pred?.awayScore} disabled={!m.open || !paid}
+                <ScoreBox def={pred?.awayScore} disabled={!m.open}
                   onSave={(v, other) => save(m, other, v)} pairId={`${m.id}`} side="a" />
                 <div className="team away"><img className="flag" src={flagUrl(m.away.flag)} alt={m.away.name} loading="lazy" /><span>{m.away.name}</span></div>
               </div>

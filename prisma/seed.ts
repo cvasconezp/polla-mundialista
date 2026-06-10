@@ -5,6 +5,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { fetchWorldCupMatches, mapStatus, isKnockout } from '../lib/footballData';
+import { fdStageToPhase } from '../lib/phases';
 import { teamInfo } from '../lib/teams';
 
 const prisma = new PrismaClient();
@@ -54,8 +55,8 @@ async function importRealMatches() {
     await upsertTeam(aCode, m.awayTeam.name);
     await prisma.match.upsert({
       where: { externalId: m.id },
-      update: { kickoff: new Date(m.utcDate), status: mapStatus(m.status), homeScore: m.score.fullTime.home, awayScore: m.score.fullTime.away },
-      create: { externalId: m.id, stage: isKnockout(m.stage) ? 'KNOCKOUT' : 'GROUP',
+      update: { kickoff: new Date(m.utcDate), status: mapStatus(m.status), homeScore: m.score.fullTime.home, awayScore: m.score.fullTime.away, phase: fdStageToPhase(m.stage) },
+      create: { externalId: m.id, stage: isKnockout(m.stage) ? 'KNOCKOUT' : 'GROUP', phase: fdStageToPhase(m.stage),
         group: m.group?.replace('GROUP_', '') ?? null, homeCode: hCode, awayCode: aCode,
         kickoff: new Date(m.utcDate), status: mapStatus(m.status), homeScore: m.score.fullTime.home, awayScore: m.score.fullTime.away },
     });

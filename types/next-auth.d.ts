@@ -9,6 +9,7 @@ declare module 'next-auth' {
       isAdmin?: boolean;
       hasPaid?: boolean;
       championPick?: string | null;
+      phone?: string | null;
     };
   }
 }

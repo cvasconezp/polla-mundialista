@@ -2,11 +2,13 @@
 import { useEffect, useState } from 'react';
 
 const CARDS = [
-  { icon: '⚽', title: '¡Bienvenido a la Polla Mundialista!', body: 'Predice los marcadores de los partidos del Mundial 2026 y compite con todos por el bote.' },
-  { icon: '📝', title: 'Cómo predecir', body: 'Escribe el marcador que crees para cada partido. Puedes editarlo hasta el pitazo inicial — al empezar el partido, se bloquea automáticamente.' },
-  { icon: '🎯', title: 'Cómo se ganan puntos', body: 'Marcador exacto: 5 pts · Acertar ganador y diferencia: 3 pts · Solo el ganador: 1 pt · En eliminatorias, +2 por acertar quién avanza.' },
-  { icon: '🏆', title: 'Campeón y bote', body: 'Elige al campeón del torneo (vale 10 pts). El pick se cierra cuando todos los equipos hayan debutado. Gana quien más puntos sume; el desempate es por más marcadores exactos.' },
-  { icon: '💵', title: 'Tu aporte', body: 'Para jugar por el bote, paga tu aporte al organizador. Podrás cargar tus pronósticos cuando confirme tu pago.' },
+  { icon: '⚽', title: '¡Bienvenido a la Polla Mundialista!', body: 'Predice los partidos del Mundial 2026 por fases y compite por el bote con todos.' },
+  { icon: '🗂️', title: 'El torneo va por 5 fases', body: 'Grupos · Dieciseisavos · Octavos · Cuartos · Semifinales. Cada fase es su propia competencia con su propio bote.' },
+  { icon: '💵', title: 'Pago por fase', body: 'Cada fase cuesta $5: $4 van al bote y $1 cubre los costos de la app. Pagas solo las fases que juegas y puedes unirte en cualquier fase.' },
+  { icon: '📝', title: 'Predice y gana puntos', body: 'Marcador exacto: 5 · Ganador y diferencia: 3 · Solo ganador: 1 · En eliminatorias, +2 por acertar quién avanza. Se bloquea al pitazo inicial.' },
+  { icon: '🏆', title: 'Elige al campeón', body: 'Cuanto antes aciertes al campeón, más vale: Grupos 50 · 16avos 25 · 8vos 10 · Cuartos 5. Puedes cambiarlo cada fase; cuenta la fase más temprana en que aciertas.' },
+  { icon: '💰', title: 'Premios', body: 'Cada fase reparte su bote entre el top 3 (60/30/10%). Además hay una tabla general acumulada con su propio premio. El campeón se define con la final real.' },
+  { icon: '📱', title: 'Tu WhatsApp', body: 'Te pedimos tu número para sumarte al grupo/canal de la polla y avisarte de los partidos.' },
 ];
 
 export default function Tutorial() {

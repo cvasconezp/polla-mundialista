@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Tutorial from './Tutorial';
+import PhoneGate from './PhoneGate';
 
 type Head = { pot?: number; currency?: string; myPts?: number; myRank?: string };
 
@@ -19,6 +20,7 @@ export default function Shell({ children, head }: { children: React.ReactNode; h
   ];
   return (
     <div className="app">
+      <PhoneGate />
       <Tutorial />
       <header className="hd">
         <div className="brand">

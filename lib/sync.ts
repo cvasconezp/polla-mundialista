@@ -3,6 +3,7 @@
 
 import { prisma } from './prisma';
 import { fetchWorldCupMatches, mapStatus, isKnockout } from './footballData';
+import { fdStageToPhase } from './phases';
 import { scoreMatch, type MatchResult } from './scoring';
 import { getSettings, rulesFromSettings } from './settings';
 import { teamInfo } from './teams';
@@ -48,6 +49,7 @@ export async function runSync(): Promise<SyncReport> {
         data: {
           externalId: fd.id,
           stage: isKnockout(fd.stage) ? 'KNOCKOUT' : 'GROUP',
+          phase: fdStageToPhase(fd.stage),
           group: fd.group?.replace('GROUP_', '') ?? null,
           homeCode: hCode, awayCode: aCode,
           kickoff: new Date(fd.utcDate), status: newStatus,
