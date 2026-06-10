@@ -6,8 +6,8 @@ const CARDS = [
   { icon: '🗂️', title: 'El torneo va por 5 fases', body: 'Grupos · Dieciseisavos · Octavos · Cuartos · Semifinales. Cada fase es su propia competencia con su propio bote.' },
   { icon: '💵', title: 'Pago por fase', body: 'Cada fase cuesta $5: $4 van al bote y $1 cubre los costos de la app. Pagas solo las fases que juegas y puedes unirte en cualquier fase.' },
   { icon: '📝', title: 'Predice y gana puntos', body: 'Marcador exacto: 5 · Ganador y diferencia: 3 · Solo ganador: 1 · En eliminatorias, +2 por acertar quién avanza. Se bloquea al pitazo inicial.' },
-  { icon: '🏆', title: 'Elige al campeón', body: 'Cuanto antes aciertes al campeón, más vale: Grupos 50 · 16avos 25 · 8vos 10 · Cuartos 5. Puedes cambiarlo cada fase; cuenta la fase más temprana en que aciertas.' },
-  { icon: '💰', title: 'Premios', body: 'Cada fase reparte su bote entre el top 3 (60/30/10%). Además hay una tabla general acumulada con su propio premio. El campeón se define con la final real.' },
+  { icon: '🏆', title: 'Elige al campeón', body: 'Vale más mientras antes lo aciertes: Grupos 50 · 16avos 25 · 8vos 10 · Cuartos 5 (en Semis ya no suma). Puedes cambiar de equipo, pero el bono cuenta desde la fase en que elegiste al campeón real: cambiarlo cada fase no te da el puntaje alto.' },
+  { icon: '💰', title: 'Premios', body: 'De cada fase, el 60% de su bote premia al top 3 de esa fase (60/30/10%) y el 40% se acumula a la tabla general, que al cierre premia a su propio top 3. El bono del campeón se confirma con la final real.' },
   { icon: '📱', title: 'Tu WhatsApp', body: 'Te pedimos tu número para sumarte al grupo/canal de la polla y avisarte de los partidos.' },
 ];
 

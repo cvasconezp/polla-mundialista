@@ -29,7 +29,6 @@ export default function Home() {
   const [head, setHead] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [hint, setHint] = useState<number | null>(null);
-  const [calOpen, setCalOpen] = useState(false);
   const [openDays, setOpenDays] = useState<Set<string>>(new Set());
   const activeRef = useRef<HTMLDivElement>(null);
   const scrolledRef = useRef(false);
@@ -69,7 +68,6 @@ export default function Home() {
   const toggleDay = (k: string) =>
     setOpenDays((s) => { const n = new Set(s); n.has(k) ? n.delete(k) : n.add(k); return n; });
 
-
   const load = useCallback(async () => {
     try {
       const [p, lb] = await Promise.all([api('/api/predictions'), api('/api/leaderboard')]);
@@ -91,6 +89,14 @@ export default function Home() {
     } catch (e: any) { alert(e.message); load(); }
   }
 
+  async function clearPred(m: Match) {
+    if (!confirm('¿Borrar tu pronóstico de este partido y dejarlo en blanco?')) return;
+    try {
+      await api('/api/predictions', { method: 'DELETE', body: JSON.stringify({ matchId: m.id }) });
+      load();
+    } catch (e: any) { alert(e.message); }
+  }
+
   if (status === 'unauthenticated') return <Landing />;
   if (status !== 'authenticated' || loading) return <Shell head={head}><div className="spinner">Cargando…</div></Shell>;
 
@@ -108,13 +114,16 @@ export default function Home() {
         <div className="meta"><span>Partido {m.id}</span>{badge}</div>
         <div className="row">
           <div className="team"><img className="flag" src={flagUrl(m.home.flag)} alt={m.home.name} loading="lazy" /><span>{m.home.name}</span></div>
-          <ScoreBox def={pred?.homeScore} disabled={!m.open}
+          <ScoreBox key={`h${m.id}-${pred?.homeScore ?? 'n'}-${pred?.awayScore ?? 'n'}`} def={pred?.homeScore} disabled={!m.open}
             onSave={(v, other) => save(m, v, other)} pairId={`${m.id}`} side="h" />
           <span className="vs">vs</span>
-          <ScoreBox def={pred?.awayScore} disabled={!m.open}
+          <ScoreBox key={`a${m.id}-${pred?.homeScore ?? 'n'}-${pred?.awayScore ?? 'n'}`} def={pred?.awayScore} disabled={!m.open}
             onSave={(v, other) => save(m, other, v)} pairId={`${m.id}`} side="a" />
           <div className="team away"><img className="flag" src={flagUrl(m.away.flag)} alt={m.away.name} loading="lazy" /><span>{m.away.name}</span></div>
         </div>
+        {m.open && pred && (
+          <button className="del-pred" onClick={() => clearPred(m)}>🗑️ Borrar pronóstico</button>
+        )}
         {m.status === 'FINISHED' && (
           <div className="result">
             Resultado: <b>{m.home.name} {m.homeScore}–{m.awayScore} {m.away.name}</b>
@@ -130,10 +139,6 @@ export default function Home() {
   return (
     <Shell head={head}>
       <div className="sec-title">Mis predicciones</div>
-      <button className="cal-btn" onClick={() => setCalOpen(true)}>
-        📅 Suscribir calendario (horarios + alertas)
-      </button>
-      {calOpen && <CalModal onClose={() => setCalOpen(false)} />}
       {matches.some((m) => m.status === 'SCHEDULED' && !m.paidPhase) && (
         <div className="pay-banner">
           🔒 <b>Tienes fases sin pagar.</b> Cada fase cuesta $5. Podrás pronosticar los partidos de una fase cuando el organizador confirme tu pago de esa fase.
@@ -187,30 +192,5 @@ function ScoreBox({ def, disabled, onSave, pairId, side }:
         const other = (document.querySelector(`[data-pair="${pairId}"][data-side="${side === 'h' ? 'a' : 'h'}"]`) as HTMLInputElement)?.value ?? '';
         onSave(e.target.value, other);
       }} />
-  );
-}
-
-function CalModal({ onClose }: { onClose: () => void }) {
-  const host = typeof window !== 'undefined' ? window.location.host : '';
-  const httpsUrl = `https://${host}/api/calendar`;
-  const webcalUrl = `webcal://${host}/api/calendar`;
-  const googleUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl)}`;
-  const [copied, setCopied] = useState(false);
-  async function copy() {
-    try { await navigator.clipboard.writeText(httpsUrl); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
-  }
-  return (
-    <div className="cal-overlay" onClick={onClose}>
-      <div className="cal-sheet" onClick={(e) => e.stopPropagation()}>
-        <h3>📅 Suscribir calendario</h3>
-        <p>Recibe los partidos y una alerta para predecir antes de cada inicio (en hora de Ecuador).</p>
-        <a className="cal-opt" href={googleUrl} target="_blank" rel="noopener noreferrer"><span>🟢</span> Google Calendar</a>
-        <a className="cal-opt" href={webcalUrl}><span>🍎</span> iPhone / Apple Calendar</a>
-        <button className="cal-opt" onClick={copy}><span>🔗</span> {copied ? '¡Enlace copiado!' : 'Copiar enlace (otros)'}</button>
-        <a className="cal-opt" href={httpsUrl} download="polla-mundialista.ics"><span>⬇️</span> Descargar (.ics) e importar</a>
-        <p className="cal-tip">📱 En Android, si no aparece: abre Google Calendar → Menú → Ajustes → activa "Polla Mundialista 2026". Google sincroniza el calendario suscrito cada cierto tiempo (no al instante). Si lo quieres ya, usa "Descargar (.ics)".</p>
-        <button className="cal-close" onClick={onClose}>Cerrar</button>
-      </div>
-    </div>
   );
 }

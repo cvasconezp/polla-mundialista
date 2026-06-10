@@ -73,3 +73,23 @@ export async function POST(req: NextRequest) {
   });
   return NextResponse.json({ ok: true, prediction: saved });
 }
+
+// DELETE: borrar mi predicción y dejar el partido en blanco (solo antes del pitazo inicial)
+export async function DELETE(req: NextRequest) {
+  const user = await currentUser();
+  if (!user) return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+
+  const body = await req.json().catch(() => ({}));
+  const matchId = Number(body.matchId);
+  if (!Number.isInteger(matchId)) return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
+
+  const match = await prisma.match.findUnique({ where: { id: matchId } });
+  if (!match) return NextResponse.json({ error: 'Partido no existe' }, { status: 404 });
+
+  if (!isPredictionOpen({ status: match.status, kickoff: match.kickoff })) {
+    return NextResponse.json({ error: 'Predicciones cerradas para este partido' }, { status: 403 });
+  }
+
+  await prisma.prediction.deleteMany({ where: { userId: user.id, matchId } });
+  return NextResponse.json({ ok: true });
+}
