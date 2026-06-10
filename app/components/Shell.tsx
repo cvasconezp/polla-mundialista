@@ -45,7 +45,7 @@ export default function Shell({ children, head }: { children: React.ReactNode; h
         <div className="whoami">
           <span className="wa-name">{session?.user?.name ?? session?.user?.email ?? 'Invitado'}</span>
           <button className="wa-rules" onClick={() => window.dispatchEvent(new Event('open-tutorial'))}>📖 Cómo jugar</button>
-          {session && <a className="wa-link" onClick={() => signOut()}>Salir</a>}
+          {session && <a className="wa-link" onClick={() => signOut({ callbackUrl: '/' })}>Salir</a>}
         </div>
       </header>
       <main className="mn">{children}
