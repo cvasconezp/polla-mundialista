@@ -200,3 +200,6 @@ main.mn{padding:16px 14px}
 .pay-grid-row .pgn{flex:1;font-size:12.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pg-cell{width:34px;height:30px;border:1.5px solid var(--line);background:#fff;border-radius:8px;font-size:13px;font-weight:800;color:var(--green);cursor:pointer;flex-shrink:0}
 .pg-cell.on{background:var(--green);border-color:var(--green);color:#fff}
+
+.pg-del{width:30px;height:30px;border:1.5px solid #f0caca;background:#fff;border-radius:8px;font-size:13px;cursor:pointer;flex-shrink:0}
+.pg-del:active{background:#fdecec}

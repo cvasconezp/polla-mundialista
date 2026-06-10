@@ -29,6 +29,11 @@ export default function Admin() {
     await api('/api/admin/champion-winner', { method: 'POST', body: JSON.stringify({ teamCode: code || null }) });
     load();
   }
+  async function deleteUser(u: any) {
+    if (!confirm(`¿Eliminar a ${u.name ?? u.email}? Se borran sus pronósticos y pagos. No se puede deshacer.`)) return;
+    try { await api('/api/admin/delete-user', { method: 'POST', body: JSON.stringify({ userId: u.id }) }); load(); }
+    catch (e: any) { alert(e.message); }
+  }
   function exportPhones() {
     const lines = data.users.filter((u: any) => u.phone).map((u: any) => `${u.name ?? u.email}: ${u.phone}`).join('\n');
     navigator.clipboard?.writeText(lines);
@@ -85,6 +90,7 @@ export default function Admin() {
               const paid = u.paidPhases.includes(p.phase);
               return <button key={p.phase} className={`pg-cell ${paid ? 'on' : ''}`} onClick={() => togglePay(u.id, p.phase, !paid)}>{paid ? '✓' : ''}</button>;
             })}
+            {!u.isAdmin && <button className="pg-del" title="Eliminar usuario" onClick={() => deleteUser(u)}>🗑️</button>}
           </div>
         ))}
       </div>
