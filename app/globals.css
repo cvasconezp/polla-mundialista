@@ -126,7 +126,7 @@ main.mn{padding:16px 14px}
 .land-bg .fl{position:absolute;bottom:-30px;font-size:26px;animation:flagDrift 14s linear infinite;filter:saturate(1.1)}
 
 .land-hero{position:relative;z-index:1;background:linear-gradient(120deg,#0a7d3c,#075c2c,#0a7d3c,#0d8f46);background-size:300% 300%;animation:gradShift 12s ease infinite;color:#fff;padding:56px 24px 46px;text-align:center;border-radius:0 0 28px 28px;box-shadow:0 10px 30px rgba(7,92,44,.35)}
-.land-ball{width:86px;height:86px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:46px;margin:0 auto 6px;box-shadow:0 10px 26px rgba(0,0,0,.22);animation:ballFloat 3.2s ease-in-out infinite}
+.land-ball{font-size:62px;line-height:1;text-align:center;margin:0 auto 2px;animation:ballFloat 3.2s ease-in-out infinite;filter:drop-shadow(0 8px 7px rgba(0,0,0,.28))}
 .land-ball-shadow{width:54px;height:9px;border-radius:50%;background:#000;margin:0 auto 16px;animation:ballShadow 3.2s ease-in-out infinite}
 .land-hero h1{font-size:27px;font-weight:800;margin:14px 0 10px;letter-spacing:.2px}
 .land-sub{font-size:14.5px;opacity:.94;line-height:1.5;max-width:360px;margin:0 auto 20px}
@@ -138,6 +138,7 @@ main.mn{padding:16px 14px}
 .lc-box{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:8px 0;min-width:58px}
 .lc-box b{display:block;font-size:24px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
 .lc-box span{font-size:10px;text-transform:uppercase;letter-spacing:.5px;opacity:.85}
+.lc-when{display:block;margin-top:8px;font-size:11px;opacity:.85}
 
 .land-cta{background:#fff;color:var(--ink);border:none;border-radius:14px;padding:14px 28px;font-weight:800;font-size:15px;cursor:pointer;display:inline-flex;gap:10px;align-items:center;animation:ctaGlow 2.6s ease-in-out infinite, landFade .6s ease forwards;transition:transform .15s}
 .land-cta:hover{transform:translateY(-2px)}

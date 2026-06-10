@@ -2,28 +2,34 @@
 import { signIn } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
-// Primer partido del Mundial 2026 (apertura). Hora aprox.
-const KICKOFF = new Date('2026-06-11T19:00:00-05:00').getTime();
-
-function useCountdown() {
+function useCountdown(target: number | null) {
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-  if (now === null) return null;
-  const diff = KICKOFF - now;
+  if (now === null || target === null) return null;
+  const diff = target - now;
   if (diff <= 0) return 'live';
-  const d = Math.floor(diff / 86400000);
-  const h = Math.floor((diff % 86400000) / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  return { d, h, m, s };
+  return {
+    d: Math.floor(diff / 86400000),
+    h: Math.floor((diff % 86400000) / 3600000),
+    m: Math.floor((diff % 3600000) / 60000),
+    s: Math.floor((diff % 60000) / 1000),
+  };
 }
 
 export default function Landing() {
-  const cd = useCountdown();
+  const [target, setTarget] = useState<number | null>(null);
+  useEffect(() => {
+    fetch('/api/first-match').then((r) => r.json()).then((d) => { if (d.kickoff) setTarget(new Date(d.kickoff).getTime()); }).catch(() => {});
+  }, []);
+  const cd = useCountdown(target);
+
+  const ecText = target
+    ? new Date(target).toLocaleString('es-EC', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'America/Guayaquil' })
+    : null;
 
   return (
     <div className="landing">
@@ -58,6 +64,7 @@ export default function Landing() {
                 <div className="lc-box"><b>{String(cd.m).padStart(2, '0')}</b><span>min</span></div>
                 <div className="lc-box"><b>{String(cd.s).padStart(2, '0')}</b><span>seg</span></div>
               </div>
+              {ecText && <span className="lc-when">{ecText} · hora de Ecuador</span>}
             </>
           )}
         </div>
