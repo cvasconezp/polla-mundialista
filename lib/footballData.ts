@@ -19,17 +19,28 @@ export type FDMatch = {
   };
 };
 
-async function fdFetch(path: string): Promise<any> {
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function fdFetch(path: string, retries = 3): Promise<any> {
   const token = process.env.FOOTBALL_DATA_TOKEN;
   if (!token) throw new Error('Falta FOOTBALL_DATA_TOKEN en variables de entorno');
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'X-Auth-Token': token },
-    // Evita cache de Next en server: queremos datos frescos en el cron
-    cache: 'no-store',
-  });
-  if (res.status === 429) throw new Error('Rate limit de football-data.org (espera un minuto)');
-  if (!res.ok) throw new Error(`football-data.org ${res.status}: ${await res.text()}`);
-  return res.json();
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(`${BASE}${path}`, {
+        headers: { 'X-Auth-Token': token },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(20000),
+      });
+      if (res.status === 429) throw new Error('Rate limit de football-data.org (espera un minuto)');
+      if (!res.ok) throw new Error(`football-data.org ${res.status}: ${await res.text()}`);
+      return res.json();
+    } catch (e) {
+      lastErr = e;
+      if (attempt < retries) await sleep(attempt * 2000); // 2s, 4s entre reintentos
+    }
+  }
+  throw lastErr;
 }
 
 /** Trae todos los partidos del Mundial. */

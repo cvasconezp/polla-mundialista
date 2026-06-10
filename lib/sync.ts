@@ -5,10 +5,12 @@ import { prisma } from './prisma';
 import { fetchWorldCupMatches, mapStatus, isKnockout } from './footballData';
 import { scoreMatch, type MatchResult } from './scoring';
 import { getSettings, rulesFromSettings } from './settings';
+import { teamInfo } from './teams';
 
 export type SyncReport = {
   matchesSeen: number;
   matchesUpdated: number;
+  matchesCreated: number;
   newlyFinished: number;
   pointsRecomputed: number;
   startedAt: string;
@@ -22,14 +24,40 @@ export async function runSync(): Promise<SyncReport> {
 
   const fdMatches = await fetchWorldCupMatches();
   let matchesUpdated = 0;
+  let matchesCreated = 0;
   let newlyFinished = 0;
   let pointsRecomputed = 0;
 
-  for (const fd of fdMatches) {
-    const existing = await prisma.match.findUnique({ where: { externalId: fd.id } });
-    if (!existing) continue; // solo actualizamos partidos ya sembrados en la BD
+  async function upsertTeam(code: string, apiName?: string) {
+    const { name, iso } = teamInfo(code, apiName);
+    await prisma.team.upsert({ where: { code }, update: { name, flag: iso }, create: { code, name, flag: iso } });
+  }
 
+  for (const fd of fdMatches) {
     const newStatus = mapStatus(fd.status);
+    const existing = await prisma.match.findUnique({ where: { externalId: fd.id } });
+
+    // Partido nuevo: lo creamos automáticamente si ya tiene ambos equipos definidos.
+    // (Las eliminatorias con equipos "por definir" se omiten hasta que se conozcan.)
+    if (!existing) {
+      const hCode = fd.homeTeam.tla; const aCode = fd.awayTeam.tla;
+      if (!hCode || !aCode) continue;
+      await upsertTeam(hCode, fd.homeTeam.name);
+      await upsertTeam(aCode, fd.awayTeam.name);
+      await prisma.match.create({
+        data: {
+          externalId: fd.id,
+          stage: isKnockout(fd.stage) ? 'KNOCKOUT' : 'GROUP',
+          group: fd.group?.replace('GROUP_', '') ?? null,
+          homeCode: hCode, awayCode: aCode,
+          kickoff: new Date(fd.utcDate), status: newStatus,
+          homeScore: fd.score.fullTime.home, awayScore: fd.score.fullTime.away,
+        },
+      });
+      matchesCreated++;
+      continue;
+    }
+
     const homeScore = fd.score.fullTime.home;
     const awayScore = fd.score.fullTime.away;
 
@@ -53,7 +81,7 @@ export async function runSync(): Promise<SyncReport> {
 
     await prisma.match.update({
       where: { id: existing.id },
-      data: { status: newStatus, homeScore, awayScore, advancingCode },
+      data: { status: newStatus, homeScore, awayScore, advancingCode, kickoff: new Date(fd.utcDate) },
     });
     matchesUpdated++;
 
@@ -67,6 +95,7 @@ export async function runSync(): Promise<SyncReport> {
   return {
     matchesSeen: fdMatches.length,
     matchesUpdated,
+    matchesCreated,
     newlyFinished,
     pointsRecomputed,
     startedAt,
