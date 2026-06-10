@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Shell from './components/Shell';
+import Landing from './components/Landing';
 import { api, flagUrl } from './lib-client';
 
 type Match = {
@@ -27,7 +28,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [hint, setHint] = useState<number | null>(null);
 
-  useEffect(() => { if (status === 'unauthenticated') router.replace('/login'); }, [status, router]);
 
   const load = useCallback(async () => {
     try {
@@ -51,6 +51,7 @@ export default function Home() {
 
   const paid = (session?.user as any)?.hasPaid;
 
+  if (status === 'unauthenticated') return <Landing />;
   if (status !== 'authenticated' || loading) return <Shell head={head}><div className="spinner">Cargando…</div></Shell>;
 
   let lastDay = '';

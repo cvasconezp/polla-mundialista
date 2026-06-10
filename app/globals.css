@@ -109,3 +109,20 @@ main.mn{padding:16px 14px}
 .tut-nav{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .tut-back{background:none;border:none;color:var(--muted);font-weight:700;font-size:14px;cursor:pointer}
 .tut-next{background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px 22px;font-weight:800;font-size:14px;cursor:pointer;margin-left:auto}
+
+/* Landing pública */
+.landing{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;background:var(--bg)}
+.land-hero{background:linear-gradient(135deg,var(--green),var(--green-d));color:#fff;padding:54px 24px 44px;text-align:center;border-radius:0 0 26px 26px}
+.land-ball{width:74px;height:74px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:40px;margin:0 auto 16px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.land-hero h1{font-size:26px;font-weight:800;margin:0 0 10px}
+.land-sub{font-size:14.5px;opacity:.92;line-height:1.5;max-width:360px;margin:0 auto 24px}
+.land-cta{background:#fff;color:var(--ink);border:none;border-radius:14px;padding:14px 26px;font-weight:800;font-size:15px;cursor:pointer;display:inline-flex;gap:10px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.land-note{font-size:11.5px;opacity:.8;margin-top:12px}
+.land-features{padding:26px 18px 10px;display:flex;flex-direction:column;gap:12px}
+.land-feat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;display:flex;flex-direction:column;gap:3px}
+.land-feat .lf-ic{font-size:24px;margin-bottom:4px}
+.land-feat b{font-size:15px}
+.land-feat span{font-size:12.5px;color:var(--muted);line-height:1.45}
+.land-foot{margin-top:auto;padding:24px;text-align:center;font-size:12.5px;color:var(--muted)}
+.land-foot a,.app-credit a{color:var(--green);font-weight:700;text-decoration:none}
+.app-credit{text-align:center;font-size:11px;color:var(--muted);padding:18px 0 4px}

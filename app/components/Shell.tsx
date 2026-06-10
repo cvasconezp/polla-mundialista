@@ -36,7 +36,9 @@ export default function Shell({ children, head }: { children: React.ReactNode; h
           {session && <a onClick={() => signOut()} style={{ cursor: 'pointer' }}>Salir</a>}
         </div>
       </header>
-      <main className="mn">{children}</main>
+      <main className="mn">{children}
+        <div className="app-credit">Desarrollado por <a href="https://www.yachaydeep.com/" target="_blank" rel="noopener noreferrer">YachayDeep</a></div>
+      </main>
       <nav className="bn">
         {tabs.map((t) => (
           <Link key={t.href} href={t.href} className={path === t.href ? 'active' : ''}>
