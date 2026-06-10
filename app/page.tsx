@@ -50,12 +50,20 @@ export default function Home() {
     return next ? dayKey(next.kickoff) : '';
   }, [matches]);
 
-  // Al cargar: abre solo el día actual y desplázate hasta él.
+  // Al cargar: abre solo el día actual y desplázate hasta él,
+  // dejando visible el encabezado fijo (resta su altura al scroll).
   useEffect(() => {
     if (!activeKey || scrolledRef.current) return;
     setOpenDays(new Set([activeKey]));
     scrolledRef.current = true;
-    setTimeout(() => activeRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+    setTimeout(() => {
+      const el = activeRef.current;
+      if (!el) return;
+      const header = document.querySelector('header.hd') as HTMLElement | null;
+      const offset = (header?.offsetHeight ?? 0) + 10;
+      const top = el.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }, 250);
   }, [activeKey]);
 
   const toggleDay = (k: string) =>
