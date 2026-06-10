@@ -51,7 +51,7 @@ export default function Tabla() {
           ))}
         </div>
       )}
-      <div className="note">Cada fase reparte su bote entre el top 3; la tabla general acumula el 40% de cada fase para su propio top 3.</div>
+      <div className="note">Cada fase reparte su bote entre el top 3; la tabla general acumula el 40% de cada fase para su propio top 3.{tab === 'GENERAL' && ' Jugar las 5 fases te da más puntos y más opciones de ganar la general.'}</div>
     </Shell>
   );
 }

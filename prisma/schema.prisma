@@ -41,7 +41,8 @@ model User {
   isAdmin       Boolean        @default(false)
   hasPaid       Boolean        @default(false) // legacy
   paidAmount    Float          @default(0)     // legacy
-  championPick  String?        // legacy (v1)
+  championPick  String?        // elección actual de campeón
+  championPickPhase Phase?     // fase en que eligió a su campeón actual
   createdAt     DateTime       @default(now())
   predictions   Prediction[]
   phasePayments PhasePayment[]

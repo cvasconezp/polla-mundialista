@@ -32,9 +32,13 @@ export default function Campeon() {
         {info.locked ? (
           <p>La elección de campeón ya está cerrada.</p>
         ) : (
-          <p>Estás en <b>{info.phaseLabel}</b>. Si aciertas al campeón desde esta fase, vale <b>{info.tier} pts</b>. Puedes cambiarlo cada fase; cuenta la fase más temprana en que aciertas.</p>
+          <p>Estás en <b>{info.phaseLabel}</b>. Elegir o cambiar ahora vale <b>{info.currentPhaseTier} pts</b> si tu campeón gana. Si cambias de equipo, el bono se recalcula desde esta fase (solo cuenta tu elección actual).</p>
         )}
       </div>
+
+      {info.currentPick && (() => { const t = teams.find((x) => x.code === info.currentPick); return (
+        <div className="note" style={{ textAlign: 'center' }}>⭐ Tu campeón actual: <b>{t?.name ?? info.currentPick}</b> · elegido en <b>{info.pickPhase}</b> · vale <b>{info.pickTier} pts</b> si gana.</div>
+      ); })()}
 
       {!info.locked && !info.paid && (
         <div className="pay-banner">🔒 Paga la fase actual ({info.phaseLabel}) para poder elegir campeón.</div>

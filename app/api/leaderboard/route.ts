@@ -37,7 +37,8 @@ export async function GET() {
       userId: u.id,
       name: u.name ?? u.email,
       paidPhases: u.phasePayments.filter((x) => x.paid).map((x) => x.phase as Phase),
-      championPicks: Object.fromEntries(u.championPicks.map((c) => [c.phase, c.teamCode])) as Partial<Record<Phase, string>>,
+      championPick: u.championPick,
+      championPickPhase: u.championPickPhase as Phase | null,
       matchPoints,
     };
   });

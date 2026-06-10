@@ -40,8 +40,8 @@ export function fdStageToPhase(stage: string): Phase | null {
   if (s === 'LAST_16' || s === 'ROUND_OF_16') return 'R16';
   if (s === 'QUARTER_FINALS' || s === 'QUARTER_FINAL') return 'QF';
   if (s === 'SEMI_FINALS' || s === 'SEMI_FINAL') return 'SF';
-  if (s === 'THIRD_PLACE' || s === '3RD_PLACE') return 'THIRD';
-  if (s === 'FINAL') return 'FINAL';
+  if (s === 'THIRD_PLACE' || s === '3RD_PLACE') return 'SF';
+  if (s === 'FINAL') return 'SF';
   return null;
 }
 
@@ -61,19 +61,18 @@ export type PlayerV2 = {
   userId: string;
   name: string;
   paidPhases: Phase[];                       // fases que pagó
-  championPicks: Partial<Record<Phase, string>>; // pick de campeón por fase
+  championPick?: string | null;
+  championPickPhase?: Phase | null;
   matchPoints: MatchPoint[];                 // puntos de partidos FINALIZADOS
 };
 
 export type Row = { userId: string; name: string; points: number; exact: number };
 
-/** Bono de campeón: fase MÁS TEMPRANA en que el pick coincide con el campeón real. */
-export function championBonus(picks: Partial<Record<Phase, string>>, realChampion: string | null): number {
-  if (!realChampion) return 0;
-  for (const ph of ACTIVE_PHASES) {
-    if (picks[ph] && picks[ph] === realChampion) return CHAMPION_TIER[ph];
-  }
-  return 0;
+/** Bono de campeón: solo cuenta tu elección ACTUAL, valorada en la fase en que la elegiste.
+ *  Cambiar de equipo reinicia el crédito a la fase del equipo nuevo (anti-"cubrir varios"). */
+export function championBonus(pick: string | null | undefined, pickPhase: Phase | null | undefined, realChampion: string | null): number {
+  if (!realChampion || !pick || !pickPhase) return 0;
+  return pick === realChampion ? (CHAMPION_TIER[pickPhase] ?? 0) : 0;
 }
 
 function pointsInPhase(mp: MatchPoint[], phase: Phase): { points: number; exact: number } {
@@ -104,7 +103,7 @@ export function phaseStandings(players: PlayerV2[], phase: Phase): Row[] {
 export function generalStandings(players: PlayerV2[], realChampion: string | null): Row[] {
   const rows = players.map((p) => {
     const { points, exact } = totalPoints(p.matchPoints);
-    return { userId: p.userId, name: p.name, points: points + championBonus(p.championPicks, realChampion), exact };
+    return { userId: p.userId, name: p.name, points: points + championBonus(p.championPick, p.championPickPhase, realChampion), exact };
   });
   return sortRows(rows);
 }
