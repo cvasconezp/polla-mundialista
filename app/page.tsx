@@ -42,12 +42,14 @@ export default function Home() {
   useEffect(() => { if (status === 'authenticated') load(); }, [status, load]);
 
   async function save(m: Match, h: string, a: string) {
-    if (h === '' || a === '') return;
+    if (h === '' || a === '' || !paid) return;
     try {
       await api('/api/predictions', { method: 'POST', body: JSON.stringify({ matchId: m.id, homeScore: +h, awayScore: +a }) });
       setHint(m.id); setTimeout(() => setHint(null), 1200);
     } catch (e: any) { alert(e.message); load(); }
   }
+
+  const paid = (session?.user as any)?.hasPaid;
 
   if (status !== 'authenticated' || loading) return <Shell head={head}><div className="spinner">Cargando…</div></Shell>;
 
@@ -55,6 +57,14 @@ export default function Home() {
   return (
     <Shell head={head}>
       <div className="sec-title">Mis predicciones</div>
+      <a className="cal-btn" href={typeof window !== 'undefined' ? `webcal://${window.location.host}/api/calendar` : '#'}>
+        📅 Suscribir calendario (horarios + alertas)
+      </a>
+      {!paid && (
+        <div className="pay-banner">
+          🔒 <b>Tu aporte está pendiente.</b> Podrás cargar tus pronósticos cuando el organizador confirme tu pago. Mientras tanto puedes ver los partidos y elegir tu campeón.
+        </div>
+      )}
       {matches.map((m) => {
         const day = fmtDay(m.kickoff); const showDay = day !== lastDay; lastDay = day;
         const badge = m.status === 'FINISHED'
@@ -70,10 +80,10 @@ export default function Home() {
               <div className="meta"><span>Partido {m.id}</span>{badge}</div>
               <div className="row">
                 <div className="team"><img className="flag" src={flagUrl(m.home.flag)} alt={m.home.name} loading="lazy" /><span>{m.home.name}</span></div>
-                <ScoreBox def={pred?.homeScore} disabled={!m.open}
+                <ScoreBox def={pred?.homeScore} disabled={!m.open || !paid}
                   onSave={(v, other) => save(m, v, other)} pairId={`${m.id}`} side="h" />
                 <span className="vs">vs</span>
-                <ScoreBox def={pred?.awayScore} disabled={!m.open}
+                <ScoreBox def={pred?.awayScore} disabled={!m.open || !paid}
                   onSave={(v, other) => save(m, other, v)} pairId={`${m.id}`} side="a" />
                 <div className="team away"><img className="flag" src={flagUrl(m.away.flag)} alt={m.away.name} loading="lazy" /><span>{m.away.name}</span></div>
               </div>

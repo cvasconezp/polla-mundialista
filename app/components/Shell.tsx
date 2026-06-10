@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
+import Tutorial from './Tutorial';
 
 type Head = { pot?: number; currency?: string; myPts?: number; myRank?: string };
 
@@ -18,6 +19,7 @@ export default function Shell({ children, head }: { children: React.ReactNode; h
   ];
   return (
     <div className="app">
+      <Tutorial />
       <header className="hd">
         <div className="brand">
           <div className="ball">⚽</div>
@@ -30,6 +32,7 @@ export default function Shell({ children, head }: { children: React.ReactNode; h
         </div>
         <div className="whoami">
           <span>👤 {session?.user?.name ?? session?.user?.email ?? 'Invitado'}</span>
+          <a onClick={() => window.dispatchEvent(new Event('open-tutorial'))} style={{ cursor: 'pointer', marginLeft: 'auto' }}>❓ Reglas</a>
           {session && <a onClick={() => signOut()} style={{ cursor: 'pointer' }}>Salir</a>}
         </div>
       </header>

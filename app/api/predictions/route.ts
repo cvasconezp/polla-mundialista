@@ -48,6 +48,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
   }
 
+  // Bloqueo: solo pueden predecir quienes pagaron el aporte (confirmado por el admin).
+  const me = await prisma.user.findUnique({ where: { id: user.id }, select: { hasPaid: true } });
+  if (!me?.hasPaid) return NextResponse.json({ error: 'Tu aporte está pendiente. Podrás predecir cuando el organizador confirme tu pago.' }, { status: 403 });
+
   const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match) return NextResponse.json({ error: 'Partido no existe' }, { status: 404 });
 

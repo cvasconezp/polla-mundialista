@@ -90,3 +90,22 @@ main.mn{padding:16px 14px}
 .btn-google{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 20px;font-weight:700;font-size:14px;cursor:pointer;display:inline-flex;gap:10px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .btn-primary{background:var(--green);color:#fff;border:none;border-radius:12px;padding:12px 22px;font-weight:700;font-size:14px;cursor:pointer}
 .spinner{font-size:13px;color:var(--muted);text-align:center;padding:30px}
+
+/* Calendario / aporte pendiente */
+.cal-btn{display:block;text-align:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;font-weight:700;font-size:13px;color:var(--blue);text-decoration:none;margin-bottom:12px}
+.cal-btn:active{background:var(--soft)}
+.pay-banner{background:#fff3d6;border:1px solid #f0d48a;color:#7a5a00;border-radius:12px;padding:12px 14px;font-size:12.5px;line-height:1.5;margin-bottom:14px}
+
+/* Tutorial de bienvenida */
+.tut-overlay{position:fixed;inset:0;background:rgba(15,27,45,.55);backdrop-filter:blur(3px);display:grid;place-items:center;z-index:100;padding:20px}
+.tut-card{background:#fff;border-radius:20px;max-width:360px;width:100%;padding:26px 22px 20px;text-align:center;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.tut-skip{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}
+.tut-icon{font-size:52px;line-height:1;margin:6px 0 10px}
+.tut-title{font-size:18px;margin:0 0 8px;color:var(--ink)}
+.tut-body{font-size:13.5px;color:var(--muted);line-height:1.55;margin:0 0 18px}
+.tut-dots{display:flex;gap:6px;justify-content:center;margin-bottom:16px}
+.tut-dot{width:7px;height:7px;border-radius:50%;background:var(--line)}
+.tut-dot.on{background:var(--green);width:20px;border-radius:4px}
+.tut-nav{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.tut-back{background:none;border:none;color:var(--muted);font-weight:700;font-size:14px;cursor:pointer}
+.tut-next{background:var(--green);color:#fff;border:none;border-radius:12px;padding:11px 22px;font-weight:800;font-size:14px;cursor:pointer;margin-left:auto}

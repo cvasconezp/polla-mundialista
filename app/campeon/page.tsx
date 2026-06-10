@@ -15,8 +15,9 @@ export default function Campeon() {
     api('/api/teams').then((d) => { setTeams(d.teams); setLocked(d.championLocked); }).catch(() => {});
   }, []);
 
+  const paid = (session?.user as any)?.hasPaid;
   async function choose(code: string) {
-    if (locked) return;
+    if (locked || !paid) return;
     try {
       await api('/api/champion', { method: 'POST', body: JSON.stringify({ teamCode: code }) });
       setPick(code); setMsg('✓ Guardado'); setTimeout(() => setMsg(''), 1500);
@@ -26,13 +27,14 @@ export default function Campeon() {
   return (
     <Shell>
       <div className="sec-title">Predicción de campeón</div>
+      {!paid && <div className="pay-banner">🔒 <b>Tu aporte está pendiente.</b> Podrás elegir campeón cuando el organizador confirme tu pago.</div>}
       <div className="champ-card">
         <div className="trophy">🏆</div>
         <h3>¿Quién levanta la copa?</h3>
         <p>Acertar el campeón vale <b>10 puntos</b>. {locked ? 'El pick ya está cerrado.' : 'Se cierra al iniciar el primer partido.'}</p>
         <div className="champ-grid">
           {teams.map((t) => (
-            <button key={t.code} className={`ch ${pick === t.code ? 'sel' : ''}`} disabled={locked} onClick={() => choose(t.code)}>
+            <button key={t.code} className={`ch ${pick === t.code ? 'sel' : ''}`} disabled={locked || !paid} onClick={() => choose(t.code)}>
               <img className="flag" src={flagUrl(t.flag)} alt={t.name} loading="lazy" />{t.name}
             </button>
           ))}
