@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Shell from '../components/Shell';
-import { api } from '../lib-client';
+import { api, flagUrl } from '../lib-client';
 
 export default function Admin() {
   const { data: session, status } = useSession();
@@ -77,10 +77,10 @@ function ResultRow({ m, onSave }: { m: any; onSave: (m: any, h: string, a: strin
   const [a, setA] = useState(String(m.awayScore ?? 0));
   return (
     <div className="miniform">
-      <span className="flag">{m.home.flag}</span>
+      <img className="flag" src={flagUrl(m.home.flag)} alt={m.home.name} loading="lazy" />
       <input value={h} maxLength={2} onChange={(e) => setH(e.target.value.replace(/[^0-9]/g, ''))} />–
       <input value={a} maxLength={2} onChange={(e) => setA(e.target.value.replace(/[^0-9]/g, ''))} />
-      <span className="flag">{m.away.flag}</span>
+      <img className="flag" src={flagUrl(m.away.flag)} alt={m.away.name} loading="lazy" />
       <button onClick={() => onSave(m, h, a)}>Guardar</button>
     </div>
   );

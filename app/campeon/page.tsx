@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Shell from '../components/Shell';
-import { api } from '../lib-client';
+import { api, flagUrl } from '../lib-client';
 
 export default function Campeon() {
   const { data: session, update } = useSession();
@@ -33,7 +33,7 @@ export default function Campeon() {
         <div className="champ-grid">
           {teams.map((t) => (
             <button key={t.code} className={`ch ${pick === t.code ? 'sel' : ''}`} disabled={locked} onClick={() => choose(t.code)}>
-              <span className="flag">{t.flag}</span>{t.name}
+              <img className="flag" src={flagUrl(t.flag)} alt={t.name} loading="lazy" />{t.name}
             </button>
           ))}
         </div>

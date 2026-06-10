@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Shell from './components/Shell';
-import { api } from './lib-client';
+import { api, flagUrl } from './lib-client';
 
 type Match = {
   id: number; stage: string; group: string | null;
@@ -13,10 +13,11 @@ type Match = {
   open: boolean; prediction: { homeScore: number; awayScore: number; points: number | null } | null;
 };
 
+const TZ = 'America/Guayaquil';
 const fmtDay = (iso: string) =>
-  new Date(iso).toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'short' });
+  new Date(iso).toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'short', timeZone: TZ });
 const fmtTime = (iso: string) =>
-  new Date(iso).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+  new Date(iso).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit', timeZone: TZ });
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -68,13 +69,13 @@ export default function Home() {
             <div className="match">
               <div className="meta"><span>Partido {m.id}</span>{badge}</div>
               <div className="row">
-                <div className="team"><span className="flag">{m.home.flag}</span><span>{m.home.name}</span></div>
+                <div className="team"><img className="flag" src={flagUrl(m.home.flag)} alt={m.home.name} loading="lazy" /><span>{m.home.name}</span></div>
                 <ScoreBox def={pred?.homeScore} disabled={!m.open}
                   onSave={(v, other) => save(m, v, other)} pairId={`${m.id}`} side="h" />
                 <span className="vs">vs</span>
                 <ScoreBox def={pred?.awayScore} disabled={!m.open}
                   onSave={(v, other) => save(m, other, v)} pairId={`${m.id}`} side="a" />
-                <div className="team away"><span className="flag">{m.away.flag}</span><span>{m.away.name}</span></div>
+                <div className="team away"><img className="flag" src={flagUrl(m.away.flag)} alt={m.away.name} loading="lazy" /><span>{m.away.name}</span></div>
               </div>
               {m.status === 'FINISHED' && (
                 <div className="result">
