@@ -138,6 +138,8 @@ function CalModal({ onClose }: { onClose: () => void }) {
         <a className="cal-opt" href={googleUrl} target="_blank" rel="noopener noreferrer"><span>🟢</span> Google Calendar</a>
         <a className="cal-opt" href={webcalUrl}><span>🍎</span> iPhone / Apple Calendar</a>
         <button className="cal-opt" onClick={copy}><span>🔗</span> {copied ? '¡Enlace copiado!' : 'Copiar enlace (otros)'}</button>
+        <a className="cal-opt" href={httpsUrl} download="polla-mundialista.ics"><span>⬇️</span> Descargar (.ics) e importar</a>
+        <p className="cal-tip">📱 En Android, si no aparece: abre Google Calendar → Menú → Ajustes → activa "Polla Mundialista 2026". Google sincroniza el calendario suscrito cada cierto tiempo (no al instante). Si lo quieres ya, usa "Descargar (.ics)".</p>
         <button className="cal-close" onClick={onClose}>Cerrar</button>
       </div>
     </div>

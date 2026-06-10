@@ -177,3 +177,9 @@ main.mn{padding:16px 14px}
 .stat-grid .sg{background:var(--soft);border-radius:11px;padding:11px 6px;text-align:center}
 .stat-grid .sg b{display:block;font-size:19px;font-weight:800;color:var(--green-d);line-height:1.1}
 .stat-grid .sg span{font-size:10.5px;color:var(--muted)}
+
+/* Chip "Cómo jugar" + tip calendario */
+.whoami{display:flex;align-items:center;gap:8px}
+.wa-rules{margin-left:auto;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);color:#fff;border-radius:30px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.wa-rules:active{transform:scale(.97)}
+.cal-tip{font-size:11px;color:var(--muted);line-height:1.5;background:var(--soft);border-radius:10px;padding:10px 12px;margin:6px 0 4px;text-align:left}
