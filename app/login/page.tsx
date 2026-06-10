@@ -19,7 +19,7 @@ export default function Login() {
           <span>🔵</span> Entrar con Google
         </button>
         <p style={{ marginTop: 28, fontSize: 12, color: 'var(--muted)' }}>
-          Desarrollado por <a href="https://www.yachaydeep.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--blue)', fontWeight: 700 }}>YachayDeep</a>
+          Desarrollado por <a href="https://www.yachaydeep.com/labs" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--blue)', fontWeight: 700 }}>YachayDeep</a>
         </p>
       </div>
     </div>

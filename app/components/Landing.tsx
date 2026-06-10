@@ -65,7 +65,7 @@ export default function Landing() {
         <button className="land-cta anim" style={{ animationDelay: '.35s' }} onClick={() => signIn('google', { callbackUrl: '/' })}>
           <span>🔵</span> Entrar con Google
         </button>
-        <p className="land-note anim" style={{ animationDelay: '.45s' }}>Gratis · entras con tu cuenta de Google</p>
+        <p className="land-note anim" style={{ animationDelay: '.45s' }}>Entras con tu cuenta de Google · para jugar por el bote coordina tu aporte con el organizador</p>
       </div>
 
       <div className="land-features">
@@ -75,7 +75,7 @@ export default function Landing() {
       </div>
 
       <footer className="land-foot">
-        Desarrollado por <a href="https://www.yachaydeep.com/" target="_blank" rel="noopener noreferrer">YachayDeep</a>
+        Desarrollado por <a href="https://www.yachaydeep.com/labs" target="_blank" rel="noopener noreferrer">YachayDeep</a>
       </footer>
     </div>
   );

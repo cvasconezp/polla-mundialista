@@ -27,6 +27,7 @@ export default function Home() {
   const [head, setHead] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [hint, setHint] = useState<number | null>(null);
+  const [calOpen, setCalOpen] = useState(false);
 
 
   const load = useCallback(async () => {
@@ -58,9 +59,10 @@ export default function Home() {
   return (
     <Shell head={head}>
       <div className="sec-title">Mis predicciones</div>
-      <a className="cal-btn" href={typeof window !== 'undefined' ? `webcal://${window.location.host}/api/calendar` : '#'}>
+      <button className="cal-btn" onClick={() => setCalOpen(true)}>
         📅 Suscribir calendario (horarios + alertas)
-      </a>
+      </button>
+      {calOpen && <CalModal onClose={() => setCalOpen(false)} />}
       {!paid && (
         <div className="pay-banner">
           🔒 <b>Tu aporte está pendiente.</b> Podrás cargar tus pronósticos cuando el organizador confirme tu pago. Mientras tanto puedes ver los partidos y elegir tu campeón.
@@ -116,5 +118,28 @@ function ScoreBox({ def, disabled, onSave, pairId, side }:
         const other = (document.querySelector(`[data-pair="${pairId}"][data-side="${side === 'h' ? 'a' : 'h'}"]`) as HTMLInputElement)?.value ?? '';
         onSave(e.target.value, other);
       }} />
+  );
+}
+
+function CalModal({ onClose }: { onClose: () => void }) {
+  const host = typeof window !== 'undefined' ? window.location.host : '';
+  const httpsUrl = `https://${host}/api/calendar`;
+  const webcalUrl = `webcal://${host}/api/calendar`;
+  const googleUrl = `https://calendar.google.com/calendar/r?cid=${encodeURIComponent(webcalUrl)}`;
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try { await navigator.clipboard.writeText(httpsUrl); setCopied(true); setTimeout(() => setCopied(false), 1500); } catch {}
+  }
+  return (
+    <div className="cal-overlay" onClick={onClose}>
+      <div className="cal-sheet" onClick={(e) => e.stopPropagation()}>
+        <h3>📅 Suscribir calendario</h3>
+        <p>Recibe los partidos y una alerta para predecir antes de cada inicio (en hora de Ecuador).</p>
+        <a className="cal-opt" href={googleUrl} target="_blank" rel="noopener noreferrer"><span>🟢</span> Google Calendar</a>
+        <a className="cal-opt" href={webcalUrl}><span>🍎</span> iPhone / Apple Calendar</a>
+        <button className="cal-opt" onClick={copy}><span>🔗</span> {copied ? '¡Enlace copiado!' : 'Copiar enlace (otros)'}</button>
+        <button className="cal-close" onClick={onClose}>Cerrar</button>
+      </div>
+    </div>
   );
 }

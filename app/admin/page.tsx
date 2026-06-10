@@ -38,6 +38,21 @@ export default function Admin() {
     <Shell head={{ pot: data.pot, currency: data.currency }}>
       <div className="sec-title">Panel de administrador</div>
 
+      {data.stats && (
+        <div className="panel">
+          <h4>📊 Estadísticas de uso</h4>
+          <div className="stat-grid">
+            <div className="sg"><b>{data.stats.players}</b><span>Jugadores</span></div>
+            <div className="sg"><b>{data.stats.paid}</b><span>Pagaron</span></div>
+            <div className="sg"><b>{data.stats.unpaid}</b><span>Pendientes</span></div>
+            <div className="sg"><b>{data.stats.predictions}</b><span>Pronósticos</span></div>
+            <div className="sg"><b>{data.stats.avgPredictions}</b><span>Prom./jugador</span></div>
+            <div className="sg"><b>{data.stats.matchesFinished}/{data.stats.matchesTotal}</b><span>Partidos jugados</span></div>
+          </div>
+          {data.stats.champTop && <div className="note">⭐ Campeón más elegido: <b>{data.stats.champTop}</b> ({data.stats.champTopCount} {data.stats.champTopCount === 1 ? 'voto' : 'votos'})</div>}
+        </div>
+      )}
+
       <div className="panel">
         <h4>🤖 Automatización (activa)</h4>
         <div className="desc">Corre sola en el servidor. No necesitas estar disponible.</div>

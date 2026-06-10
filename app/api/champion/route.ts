@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { currentUser } from '@/lib/session';
+import { isChampionLocked } from '@/lib/championLock';
 
 export const dynamic = 'force-dynamic';
 
-// El pick de campeón se cierra cuando arranca el primer partido del torneo.
 async function championLocked(): Promise<boolean> {
-  const first = await prisma.match.findFirst({ orderBy: { kickoff: 'asc' } });
-  if (!first) return false;
-  return new Date() >= new Date(first.kickoff);
+  return (await isChampionLocked()).locked;
 }
 
 export async function POST(req: NextRequest) {

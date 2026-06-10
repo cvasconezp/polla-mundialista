@@ -31,7 +31,7 @@ export default function Campeon() {
       <div className="champ-card">
         <div className="trophy">🏆</div>
         <h3>¿Quién levanta la copa?</h3>
-        <p>Acertar el campeón vale <b>10 puntos</b>. {locked ? 'El pick ya está cerrado.' : 'Se cierra al iniciar el primer partido.'}</p>
+        <p>Acertar el campeón vale <b>10 puntos</b>. {locked ? 'El pick ya está cerrado.' : 'Se cierra cuando todos los equipos hayan debutado (1ª jornada).'}</p>
         <div className="champ-grid">
           {teams.map((t) => (
             <button key={t.code} className={`ch ${pick === t.code ? 'sel' : ''}`} disabled={locked || !paid} onClick={() => choose(t.code)}>
@@ -41,7 +41,7 @@ export default function Campeon() {
         </div>
         {msg && <p style={{ marginTop: 12, color: 'var(--green)', fontWeight: 700 }}>{msg}</p>}
       </div>
-      <div className="note">Solo se puede elegir un campeón y se bloquea con el primer partido del torneo.</div>
+      <div className="note">Solo se puede elegir un campeón. Tienes hasta que todos los equipos jueguen su primer partido.</div>
     </Shell>
   );
 }

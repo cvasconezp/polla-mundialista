@@ -14,14 +14,14 @@ export default function Tutorial() {
   const [i, setI] = useState(0);
 
   useEffect(() => {
-    try { if (!localStorage.getItem('pollaTutorialSeen')) setOpen(true); } catch {}
+    try { if (!sessionStorage.getItem('pollaTutorialSeen')) setOpen(true); } catch {}
     const handler = () => { setI(0); setOpen(true); };
     window.addEventListener('open-tutorial', handler);
     return () => window.removeEventListener('open-tutorial', handler);
   }, []);
 
   function close() {
-    try { localStorage.setItem('pollaTutorialSeen', '1'); } catch {}
+    try { sessionStorage.setItem('pollaTutorialSeen', '1'); } catch {}
     setOpen(false);
   }
   if (!open) return null;

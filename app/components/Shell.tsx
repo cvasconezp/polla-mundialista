@@ -22,22 +22,27 @@ export default function Shell({ children, head }: { children: React.ReactNode; h
       <Tutorial />
       <header className="hd">
         <div className="brand">
-          <div className="ball">⚽</div>
-          <div><h1>Polla Mundialista 2026</h1><small>Canadá · USA · México</small></div>
+          <div className="brand-l">
+            <div className="ball">⚽</div>
+            <div><h1>Polla Mundialista 2026</h1><small>Canadá · USA · México</small></div>
+          </div>
+          {session?.user?.image
+            ? <img className="hd-avatar" src={session.user.image} alt="" referrerPolicy="no-referrer" />
+            : <div className="hd-avatar hd-avatar-i">{(session?.user?.name ?? '·').slice(0, 1).toUpperCase()}</div>}
         </div>
         <div className="hdrow">
-          <div className="stat"><div className="k">Bote</div><div className="v">{head?.currency === 'USD' ? '$' : ''}{head?.pot ?? 0}</div></div>
-          <div className="stat"><div className="k">Mis puntos</div><div className="v">{head?.myPts ?? 0}</div></div>
-          <div className="stat"><div className="k">Mi puesto</div><div className="v">{head?.myRank ?? '—'}</div></div>
+          <div className="stat"><div className="k">💰 Bote</div><div className="v">{head?.currency === 'USD' ? '$' : ''}{head?.pot ?? 0}</div></div>
+          <div className="stat"><div className="k">⭐ Mis puntos</div><div className="v">{head?.myPts ?? 0}</div></div>
+          <div className="stat"><div className="k">📊 Mi puesto</div><div className="v">{head?.myRank ?? '—'}</div></div>
         </div>
         <div className="whoami">
-          <span>👤 {session?.user?.name ?? session?.user?.email ?? 'Invitado'}</span>
-          <a onClick={() => window.dispatchEvent(new Event('open-tutorial'))} style={{ cursor: 'pointer', marginLeft: 'auto' }}>❓ Reglas</a>
-          {session && <a onClick={() => signOut()} style={{ cursor: 'pointer' }}>Salir</a>}
+          <span className="wa-name">{session?.user?.name ?? session?.user?.email ?? 'Invitado'}</span>
+          <a className="wa-link" onClick={() => window.dispatchEvent(new Event('open-tutorial'))}>❓ Reglas</a>
+          {session && <a className="wa-link" onClick={() => signOut()}>Salir</a>}
         </div>
       </header>
       <main className="mn">{children}
-        <div className="app-credit">Desarrollado por <a href="https://www.yachaydeep.com/" target="_blank" rel="noopener noreferrer">YachayDeep</a></div>
+        <div className="app-credit">Desarrollado por <a href="https://www.yachaydeep.com/labs" target="_blank" rel="noopener noreferrer">YachayDeep</a></div>
       </main>
       <nav className="bn">
         {tabs.map((t) => (
