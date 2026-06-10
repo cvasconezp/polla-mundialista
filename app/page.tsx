@@ -54,7 +54,7 @@ export default function Home() {
   if (status === 'unauthenticated') return <Landing />;
   if (status !== 'authenticated' || loading) return <Shell head={head}><div className="spinner">Cargando…</div></Shell>;
 
-  let lastDay = '';
+  let lastDay = ''; let lastGroup = '';
   return (
     <Shell head={head}>
       <div className="sec-title">Mis predicciones</div>
@@ -68,18 +68,23 @@ export default function Home() {
         </div>
       )}
       {matches.map((m) => {
-        const day = fmtDay(m.kickoff); const showDay = day !== lastDay; lastDay = day;
+        const day = fmtDay(m.kickoff); const showDay = day !== lastDay;
+        if (showDay) lastGroup = '';
+        const grp = m.group ?? '';
+        const showGroup = grp !== '' && grp !== lastGroup;
+        lastDay = day; lastGroup = grp;
         const badge = m.status === 'FINISHED'
           ? <span className="badge lock">🔒 Finalizado</span>
           : m.status === 'LIVE'
             ? <span className="badge live">🔴 En juego · cerrado</span>
             : !m.paidPhase
-              ? <span className="badge lock">🔒 Paga la fase</span>
+              ? <span className="badge">🕑 {fmtTime(m.kickoff)} · 🔒 paga la fase</span>
               : <span className="badge">🕑 {fmtTime(m.kickoff)} · abierto</span>;
         const pred = m.prediction;
         return (
           <div key={m.id}>
-            {showDay && <div className="day">📅 {day}{m.group ? ` · Grupo ${m.group}` : ''}</div>}
+            {showDay && <div className="day">📅 {day}</div>}
+            {showGroup && <div className="grp">Grupo {grp}</div>}
             <div className="match">
               <div className="meta"><span>Partido {m.id}</span>{badge}</div>
               <div className="row">
@@ -140,9 +145,4 @@ function CalModal({ onClose }: { onClose: () => void }) {
         <a className="cal-opt" href={webcalUrl}><span>🍎</span> iPhone / Apple Calendar</a>
         <button className="cal-opt" onClick={copy}><span>🔗</span> {copied ? '¡Enlace copiado!' : 'Copiar enlace (otros)'}</button>
         <a className="cal-opt" href={httpsUrl} download="polla-mundialista.ics"><span>⬇️</span> Descargar (.ics) e importar</a>
-        <p className="cal-tip">📱 En Android, si no aparece: abre Google Calendar → Menú → Ajustes → activa "Polla Mundialista 2026". Google sincroniza el calendario suscrito cada cierto tiempo (no al instante). Si lo quieres ya, usa "Descargar (.ics)".</p>
-        <button className="cal-close" onClick={onClose}>Cerrar</button>
-      </div>
-    </div>
-  );
-}
+        <p className="cal-tip">📱 En Android, si no aparece: abre Google Calendar → Menú → Ajustes → activa "Polla Mundialista 2026".
