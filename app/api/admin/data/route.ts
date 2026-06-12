@@ -9,8 +9,9 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const admin = await currentUser();
   if (!admin?.isAdmin) return NextResponse.json({ error: 'Solo administradores' }, { status: 403 });
+  const isSuper = !!(admin as any).superAdmin;
 
-  const [users, matches, settings, totalPredictions, totalMatches, finishedMatches, champGroups, teams] = await Promise.all([
+  const [users, matches, settings, totalPredictions, totalMatches, finishedMatches, champGroups, teams, requests] = await Promise.all([
     prisma.user.findMany({ orderBy: { name: 'asc' }, include: { phasePayments: true } }),
     prisma.match.findMany({ where: { status: { not: 'SCHEDULED' } }, orderBy: { kickoff: 'asc' }, include: { home: true, away: true } }),
     getSettings(),
@@ -19,10 +20,12 @@ export async function GET() {
     prisma.match.count({ where: { status: 'FINISHED' } }),
     prisma.user.groupBy({ by: ['championPick'], _count: { championPick: true }, where: { championPick: { not: null } } }),
     prisma.team.findMany({ orderBy: { name: 'asc' }, select: { code: true, name: true } }),
+    isSuper ? prisma.adminRequest.findMany({ where: { status: 'PENDING' }, orderBy: { createdAt: 'asc' } }) : Promise.resolve([] as any[]),
   ]);
 
   const usersOut = users.map((u) => ({
-    id: u.id, name: u.name, email: u.email, phone: u.phone, isAdmin: u.isAdmin,
+    id: u.id, name: u.name, email: u.email, phone: u.phone,
+    isAdmin: u.isAdmin, superAdmin: (u as any).superAdmin ?? false,
     paidPhases: u.phasePayments.filter((p) => p.paid).map((p) => p.phase),
   }));
 
@@ -40,6 +43,7 @@ export async function GET() {
   };
 
   return NextResponse.json({
+    me: { id: admin.id, isAdmin: true, superAdmin: isSuper },
     users: usersOut,
     phases: ACTIVE_PHASES.map((p) => ({ phase: p, label: PHASE_LABEL[p] })),
     money,
@@ -48,5 +52,6 @@ export async function GET() {
     championWinner: settings.championWinner,
     currency: settings.currency,
     stats,
+    requests,
   });
 }

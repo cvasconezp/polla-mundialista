@@ -65,8 +65,16 @@ async function importRealMatches() {
   console.log(`Seed: ${n} partidos reales importados de football-data.org.`);
 }
 
+
+async function ensureSuperAdmin() {
+  const email = (process.env.SUPERADMIN_EMAIL ?? 'cvasconezp@gmail.com').toLowerCase();
+  const r = await prisma.user.updateMany({ where: { email }, data: { superAdmin: true, isAdmin: true } });
+  console.log(`Super admin (${email}): ${r.count} usuario(s) actualizado(s).`);
+}
+
 async function main() {
   await seedSettings();
+  await ensureSuperAdmin();
   if (process.env.FOOTBALL_DATA_TOKEN) {
     try { await importRealMatches(); }
     catch (e) { console.warn('No se pudo importar de la API, usando ejemplos:', (e as Error).message); await seedSampleMatches(); }

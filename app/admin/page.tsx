@@ -7,6 +7,20 @@ import { api, flagUrl } from '../lib-client';
 
 const SHORT: Record<string, string> = { GROUP: 'Gru', R32: '16', R16: '8', QF: 'Cua', SF: 'Sem' };
 const money = (n: number) => '$' + (Math.round(n * 100) / 100).toLocaleString('es-EC', { maximumFractionDigits: 2 });
+const KIND_LABEL: Record<string, string> = { UNMARK_PAYMENT: 'Desmarcar pago', DELETE_USER: 'Eliminar usuario' };
+const WA_GROUP = 'https://chat.whatsapp.com/FXmuSnDCRRWE8xrfknaOs6';
+function waNumber(phone: string): string {
+  let d = (phone || '').replace(/\D/g, '');
+  if (d.startsWith('593')) return d;
+  if (d.startsWith('0')) return '593' + d.slice(1);
+  if (d.length === 9) return '593' + d;
+  return d;
+}
+function waLink(u: any): string {
+  const name = (u.name ?? '').split(' ')[0] || '';
+  const msg = `¡Hola ${name}! 👋 Bienvenido/a a la Polla Mundialista 2026. ¡Mucha suerte con tus pronósticos! 🍀⚽\n\nÚnete al grupo de WhatsApp para los avisos y la coordinación: ${WA_GROUP}`;
+  return `https://wa.me/${waNumber(u.phone)}?text=${encodeURIComponent(msg)}`;
+}
 
 export default function Admin() {
   const { data: session, status } = useSession();
@@ -18,7 +32,10 @@ export default function Admin() {
   useEffect(() => { load(); }, [load]);
 
   async function togglePay(userId: string, phase: string, paid: boolean) {
-    await api('/api/admin/phase-payment', { method: 'POST', body: JSON.stringify({ userId, phase, paid }) });
+    try {
+      const res = await api('/api/admin/phase-payment', { method: 'POST', body: JSON.stringify({ userId, phase, paid }) });
+      if (res?.pending) alert('Solicitud enviada al super admin para confirmar el desmarcado del pago.');
+    } catch (e: any) { alert(e.message); }
     load();
   }
   async function saveResult(m: any, h: string, a: string, adv: string | null) {
@@ -30,22 +47,58 @@ export default function Admin() {
     load();
   }
   async function deleteUser(u: any) {
-    if (!confirm(`¿Eliminar a ${u.name ?? u.email}? Se borran sus pronósticos y pagos. No se puede deshacer.`)) return;
-    try { await api('/api/admin/delete-user', { method: 'POST', body: JSON.stringify({ userId: u.id }) }); load(); }
-    catch (e: any) { alert(e.message); }
+    const sup = !!data?.me?.superAdmin;
+    const msg = sup
+      ? `¿Eliminar a ${u.name ?? u.email}? Se borran sus pronósticos y pagos. No se puede deshacer.`
+      : `¿Solicitar la eliminación de ${u.name ?? u.email}? El super admin deberá confirmarla.`;
+    if (!confirm(msg)) return;
+    try {
+      const res = await api('/api/admin/delete-user', { method: 'POST', body: JSON.stringify({ userId: u.id }) });
+      if (res?.pending) alert('Solicitud enviada al super admin para confirmar la eliminación.');
+    } catch (e: any) { alert(e.message); }
+    load();
   }
-  function exportPhones() {
-    const lines = data.users.filter((u: any) => u.phone).map((u: any) => `${u.name ?? u.email}: ${u.phone}`).join('\n');
-    navigator.clipboard?.writeText(lines);
-    alert('Teléfonos copiados al portapapeles:\n\n' + (lines || 'ninguno'));
+  async function setRole(u: any, makeAdmin: boolean) {
+    if (!confirm(makeAdmin ? `¿Hacer administrador a ${u.name ?? u.email}?` : `¿Quitar el rol de administrador a ${u.name ?? u.email}?`)) return;
+    try { await api('/api/admin/role', { method: 'POST', body: JSON.stringify({ userId: u.id, makeAdmin }) }); }
+    catch (e: any) { alert(e.message); }
+    load();
+  }
+  async function resolveReq(id: number, action: 'approve' | 'reject') {
+    try { await api('/api/admin/requests', { method: 'POST', body: JSON.stringify({ id, action }) }); }
+    catch (e: any) { alert(e.message); }
+    load();
   }
 
   if (!data) return <Shell><div className="spinner">Cargando…</div></Shell>;
   const phases = data.phases as { phase: string; label: string }[];
+  const isSuper = !!data?.me?.superAdmin;
+  const requests = (data.requests ?? []) as any[];
 
   return (
     <Shell head={{ pot: Math.round((data.money.totalCollected - data.money.adminTotal) * 100) / 100, currency: data.currency }}>
-      <div className="sec-title">Panel de administrador</div>
+      <div className="sec-title">Panel de administrador {isSuper ? '· 👑 Super admin' : ''}</div>
+
+      {isSuper && (
+        <div className="panel">
+          <h4>🔔 Solicitudes pendientes {requests.length > 0 && <span style={{ background: 'var(--red)', color: '#fff', borderRadius: 20, padding: '1px 8px', fontSize: 11 }}>{requests.length}</span>}</h4>
+          <div className="desc">Acciones que un administrador pidió y requieren tu confirmación.</div>
+          {requests.length === 0 && <div style={{ fontSize: 12, color: 'var(--muted)' }}>No hay solicitudes pendientes.</div>}
+          {requests.map((r) => (
+            <div key={r.id} style={{ borderBottom: '1px solid var(--line)', padding: '9px 0' }}>
+              <div style={{ fontSize: 13, fontWeight: 700 }}>
+                {KIND_LABEL[r.kind] ?? r.kind}: {r.targetUserName ?? r.targetUserId}
+                {r.kind === 'UNMARK_PAYMENT' && r.phase && <span style={{ color: 'var(--muted)', fontWeight: 500 }}> · fase {SHORT[r.phase] ?? r.phase}</span>}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--muted)', margin: '2px 0 8px' }}>Pedido por {r.requestedByName ?? '—'}</div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="pay-btn paid" onClick={() => resolveReq(r.id, 'approve')}>✓ Aprobar</button>
+                <button className="pay-btn" onClick={() => resolveReq(r.id, 'reject')}>✕ Rechazar</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="panel">
         <h4>📊 Estadísticas</h4>
@@ -57,8 +110,22 @@ export default function Admin() {
           <div className="sg"><b>{data.stats.matchesFinished}/{data.stats.matchesTotal}</b><span>Partidos</span></div>
           <div className="sg"><b>{money(data.money.adminTotal)}</b><span>Administración</span></div>
         </div>
-        <button className="pay-btn" style={{ marginTop: 10 }} onClick={exportPhones}>📋 Copiar teléfonos (WhatsApp)</button>
       </div>
+
+      {isSuper && (
+        <div className="panel">
+          <h4>👑 Roles y administradores</h4>
+          <div className="desc">Delega el rol de administrador a cualquier jugador. Un admin puede marcar pagos, corregir resultados y definir al campeón; desmarcar pagos y eliminar usuarios requieren tu confirmación.</div>
+          {data.users.map((u: any) => (
+            <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0', borderBottom: '1px solid var(--line)' }}>
+              <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{u.name ?? u.email} {u.superAdmin && '👑'} {u.isAdmin && !u.superAdmin && <span style={{ fontSize: 10, color: 'var(--green-d)', background: 'var(--soft)', borderRadius: 20, padding: '1px 7px' }}>admin</span>}</span>
+              {u.superAdmin
+                ? <span style={{ fontSize: 11, color: 'var(--muted)' }}>tú</span>
+                : <button className={`pay-btn ${u.isAdmin ? 'paid' : ''}`} onClick={() => setRole(u, !u.isAdmin)}>{u.isAdmin ? 'Quitar admin' : 'Hacer admin'}</button>}
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="panel">
         <h4>💰 Botes y repartos</h4>
@@ -78,19 +145,20 @@ export default function Admin() {
 
       <div className="panel">
         <h4>💵 Pagos por fase ($5 c/u)</h4>
-        <div className="desc">Marca quién pagó cada fase. Verde = pagó.</div>
+        <div className="desc">Marca quién pagó cada fase. Verde = pagó.{!isSuper && ' Para desmarcar un pago se enviará una solicitud al super admin.'}</div>
         <div className="pay-grid-head">
           <span>Jugador</span>
           {phases.map((p) => <span key={p.phase} className="pgh">{SHORT[p.phase]}</span>)}
         </div>
         {data.users.map((u: any) => (
           <div key={u.id} className="pay-grid-row">
-            <span className="pgn">{u.name ?? u.email}</span>
+            <span className="pgn">{u.name ?? u.email}{u.superAdmin && ' 👑'}</span>
             {phases.map((p) => {
               const paid = u.paidPhases.includes(p.phase);
               return <button key={p.phase} className={`pg-cell ${paid ? 'on' : ''}`} onClick={() => togglePay(u.id, p.phase, !paid)}>{paid ? '✓' : ''}</button>;
             })}
-            {!u.isAdmin && <button className="pg-del" title="Eliminar usuario" onClick={() => deleteUser(u)}>🗑️</button>}
+            {u.phone && <a className="pg-wa" title="Enviar bienvenida por WhatsApp" href={waLink(u)} target="_blank" rel="noopener noreferrer" style={{ width: 30, height: 30, border: '1.5px solid #bfe6c8', background: '#eafaf0', borderRadius: 8, display: 'grid', placeItems: 'center', textDecoration: 'none', fontSize: 14, flexShrink: 0 }}>💬</a>}
+            {!u.isAdmin && <button className="pg-del" title={isSuper ? 'Eliminar usuario' : 'Solicitar eliminación'} onClick={() => deleteUser(u)}>🗑️</button>}
           </div>
         ))}
       </div>

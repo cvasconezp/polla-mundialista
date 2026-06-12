@@ -39,6 +39,7 @@ model User {
   image         String?
   phone         String?        // WhatsApp
   isAdmin       Boolean        @default(false)
+  superAdmin    Boolean        @default(false)
   hasPaid       Boolean        @default(false) // legacy
   paidAmount    Float          @default(0)     // legacy
   championPick  String?        // elección actual de campeón
@@ -170,4 +171,21 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// Solicitudes que un admin envía para que el super admin confirme (desmarcar pago / eliminar usuario)
+model AdminRequest {
+  id              Int       @id @default(autoincrement())
+  kind            String    // UNMARK_PAYMENT | DELETE_USER
+  status          String    @default("PENDING") // PENDING | APPROVED | REJECTED
+  requestedById   String
+  requestedByName String?
+  targetUserId    String
+  targetUserName  String?
+  phase           String?   // para UNMARK_PAYMENT
+  createdAt       DateTime  @default(now())
+  resolvedAt      DateTime?
+  resolvedByName  String?
+
+  @@index([status])
 }
