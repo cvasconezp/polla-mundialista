@@ -100,13 +100,17 @@ export default function Home() {
   if (status === 'unauthenticated') return <Landing />;
   if (status !== 'authenticated' || loading) return <Shell head={head}><div className="spinner">Cargando…</div></Shell>;
 
+  const isAdminUser = !!(session?.user as any)?.isAdmin;
+
   const renderMatch = (m: Match) => {
     const badge = m.status === 'FINISHED'
       ? <span className="badge lock">🔒 Finalizado</span>
       : m.status === 'LIVE'
         ? <span className="badge live">🔴 En juego · cerrado</span>
         : !m.paidPhase
-          ? <span className="badge">🕑 {fmtTime(m.kickoff)} · 🔒 paga la fase</span>
+          ? (isAdminUser
+              ? <span className="badge">🕑 {fmtTime(m.kickoff)}</span>
+              : <span className="badge">🕑 {fmtTime(m.kickoff)} · 🔒 paga la fase</span>)
           : <span className="badge">🕑 {fmtTime(m.kickoff)} · abierto</span>;
     const pred = m.prediction;
     return (
@@ -139,7 +143,9 @@ export default function Home() {
   return (
     <Shell head={head}>
       <div className="sec-title">Mis predicciones</div>
-      {matches.some((m) => m.status === 'SCHEDULED' && !m.paidPhase) && (
+      {isAdminUser ? (
+        <div className="pay-banner">👑 <b>Eres organizador.</b> Puedes ver los partidos y las tablas, pero no participas en la polla: no pronosticas, no pagas y no cuentas como jugador.</div>
+      ) : matches.some((m) => m.status === 'SCHEDULED' && !m.paidPhase) && (
         <div className="pay-banner">
           🔒 <b>Tienes fases sin pagar.</b> Cada fase cuesta $5. Podrás pronosticar los partidos de una fase cuando el organizador confirme tu pago de esa fase.
         </div>

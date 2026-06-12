@@ -150,7 +150,7 @@ export default function Admin() {
           <span>Jugador</span>
           {phases.map((p) => <span key={p.phase} className="pgh">{SHORT[p.phase]}</span>)}
         </div>
-        {data.users.map((u: any) => (
+        {data.users.filter((u: any) => !u.isAdmin).map((u: any) => (
           <div key={u.id} className="pay-grid-row">
             <span className="pgn">{u.name ?? u.email}{u.superAdmin && ' 👑'}</span>
             {phases.map((p) => {

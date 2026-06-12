@@ -29,17 +29,19 @@ export async function GET() {
     paidPhases: u.phasePayments.filter((p) => p.paid).map((p) => p.phase),
   }));
 
+  // Admin y super admin no son jugadores: no cuentan para el bote ni las estadísticas.
+  const playersList = usersOut.filter((u) => !u.isAdmin);
   const paidByPhase: Partial<Record<Phase, number>> = {};
-  for (const ph of ACTIVE_PHASES) paidByPhase[ph] = usersOut.filter((u) => u.paidPhases.includes(ph)).length;
+  for (const ph of ACTIVE_PHASES) paidByPhase[ph] = playersList.filter((u) => u.paidPhases.includes(ph)).length;
   const money = prizeDistribution(paidByPhase);
 
   const stats = {
-    players: users.length,
+    players: playersList.length,
     predictions: totalPredictions,
     avgPredictions: users.length ? Math.round((totalPredictions / users.length) * 10) / 10 : 0,
     matchesTotal: totalMatches,
     matchesFinished: finishedMatches,
-    withPhone: users.filter((u) => u.phone).length,
+    withPhone: playersList.filter((u) => u.phone).length,
   };
 
   return NextResponse.json({

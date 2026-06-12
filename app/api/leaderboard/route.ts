@@ -29,6 +29,7 @@ export async function GET() {
 
   const [users, predictions] = await Promise.all([
     prisma.user.findMany({
+      where: { isAdmin: false }, // admin y super admin son organizadores, no jugadores
       select: {
         id: true, name: true, email: true, championPick: true, championPickPhase: true,
         phasePayments: { where: { paid: true }, select: { phase: true } },
