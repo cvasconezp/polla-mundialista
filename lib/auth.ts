@@ -18,6 +18,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).id = user.id;
         (session.user as any).isAdmin = (user as any).isAdmin ?? false;
         (session.user as any).superAdmin = (user as any).superAdmin ?? false;
+        (session.user as any).permissions = (user as any).permissions ?? null;
         (session.user as any).hasPaid = (user as any).hasPaid ?? false;
         (session.user as any).championPick = (user as any).championPick ?? null;
         (session.user as any).phone = (user as any).phone ?? null;

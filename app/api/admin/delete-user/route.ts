@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { currentUser } from '@/lib/session';
+import { adminCan } from '@/lib/perms';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   const admin = await currentUser();
-  if (!admin?.isAdmin) return NextResponse.json({ error: 'Solo administradores' }, { status: 403 });
+  if (!admin?.isAdmin || !adminCan(admin as any, 'deleteUsers')) return NextResponse.json({ error: 'No tienes permiso para eliminar usuarios' }, { status: 403 });
   const isSuper = !!(admin as any).superAdmin;
 
   const { userId } = await req.json();

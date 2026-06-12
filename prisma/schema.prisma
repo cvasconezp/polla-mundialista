@@ -40,6 +40,7 @@ model User {
   phone         String?        // WhatsApp
   isAdmin       Boolean        @default(false)
   superAdmin    Boolean        @default(false)
+  permissions   Json?          // accesos del admin: {payments,results,champion,deleteUsers}
   hasPaid       Boolean        @default(false) // legacy
   paidAmount    Float          @default(0)     // legacy
   championPick  String?        // elección actual de campeón

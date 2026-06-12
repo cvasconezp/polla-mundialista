@@ -25,7 +25,7 @@ export async function GET() {
 
   const usersOut = users.map((u) => ({
     id: u.id, name: u.name, email: u.email, phone: u.phone,
-    isAdmin: u.isAdmin, superAdmin: (u as any).superAdmin ?? false,
+    isAdmin: u.isAdmin, superAdmin: (u as any).superAdmin ?? false, permissions: (u as any).permissions ?? null,
     paidPhases: u.phasePayments.filter((p) => p.paid).map((p) => p.phase),
   }));
 

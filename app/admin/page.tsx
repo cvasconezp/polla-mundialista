@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Shell from '../components/Shell';
 import { api, flagUrl } from '../lib-client';
+import { PERMISSION_KEYS, PERMISSION_LABELS, DEFAULT_PERMS } from '@/lib/perms';
 
 const SHORT: Record<string, string> = { GROUP: 'Gru', R32: '16', R16: '8', QF: 'Cua', SF: 'Sem' };
 const money = (n: number) => '$' + (Math.round(n * 100) / 100).toLocaleString('es-EC', { maximumFractionDigits: 2 });
@@ -62,6 +63,11 @@ export default function Admin() {
     catch (e: any) { alert(e.message); }
     load();
   }
+  async function setPerm(u: any, key: string, value: boolean) {
+    try { await api('/api/admin/permissions', { method: 'POST', body: JSON.stringify({ userId: u.id, key, value }) }); }
+    catch (e: any) { alert(e.message); }
+    load();
+  }
   async function resolveReq(id: number, action: 'approve' | 'reject') {
     try { await api('/api/admin/requests', { method: 'POST', body: JSON.stringify({ id, action }) }); }
     catch (e: any) { alert(e.message); }
@@ -113,15 +119,32 @@ export default function Admin() {
       {isSuper && (
         <div className="panel">
           <h4>👑 Roles y administradores</h4>
-          <div className="desc">Delega el rol de administrador a cualquier jugador. Un admin puede marcar pagos, corregir resultados y definir al campeón; desmarcar pagos y eliminar usuarios requieren tu confirmación.</div>
-          {data.users.map((u: any) => (
-            <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0', borderBottom: '1px solid var(--line)' }}>
-              <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{u.name ?? u.email} {u.superAdmin && '👑'} {u.isAdmin && !u.superAdmin && <span style={{ fontSize: 10, color: 'var(--green-d)', background: 'var(--soft)', borderRadius: 20, padding: '1px 7px' }}>admin</span>}</span>
-              {u.superAdmin
-                ? <span style={{ fontSize: 11, color: 'var(--muted)' }}>tú</span>
-                : <button className={`pay-btn ${u.isAdmin ? 'paid' : ''}`} onClick={() => setRole(u, !u.isAdmin)}>{u.isAdmin ? 'Quitar admin' : 'Hacer admin'}</button>}
-            </div>
-          ))}
+          <div className="desc">Delega el rol de administrador a cualquier jugador y define qué accesos tiene cada uno. Toca un permiso para activarlo (verde) o quitarlo. Eliminar usuarios siempre te llega como solicitud para confirmar.</div>
+          {data.users.map((u: any) => {
+            const perms = u.permissions ?? DEFAULT_PERMS;
+            return (
+              <div key={u.id} style={{ padding: '8px 0', borderBottom: '1px solid var(--line)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{u.name ?? u.email} {u.superAdmin && '👑'} {u.isAdmin && !u.superAdmin && <span style={{ fontSize: 10, color: 'var(--green-d)', background: 'var(--soft)', borderRadius: 20, padding: '1px 7px' }}>admin</span>}</span>
+                  {u.superAdmin
+                    ? <span style={{ fontSize: 11, color: 'var(--muted)' }}>tú</span>
+                    : <button className={`pay-btn ${u.isAdmin ? 'paid' : ''}`} onClick={() => setRole(u, !u.isAdmin)}>{u.isAdmin ? 'Quitar admin' : 'Hacer admin'}</button>}
+                </div>
+                {u.isAdmin && !u.superAdmin && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                    {PERMISSION_KEYS.map((k) => {
+                      const on = (perms as any)[k] !== false;
+                      return <button key={k} onClick={() => setPerm(u, k, !on)}
+                        style={{ fontSize: 11, fontWeight: 700, padding: '4px 9px', borderRadius: 20, cursor: 'pointer',
+                                 border: '1px solid ' + (on ? 'var(--green)' : 'var(--line)'),
+                                 background: on ? 'var(--green)' : '#fff', color: on ? '#fff' : 'var(--muted)' }}>
+                        {on ? '✓' : '○'} {PERMISSION_LABELS[k]}</button>;
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

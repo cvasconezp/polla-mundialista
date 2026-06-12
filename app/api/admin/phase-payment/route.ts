@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { currentUser } from '@/lib/session';
+import { adminCan } from '@/lib/perms';
 import { ACTIVE_PHASES } from '@/lib/phases';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   const admin = await currentUser();
-  if (!admin?.isAdmin) return NextResponse.json({ error: 'Solo administradores' }, { status: 403 });
+  if (!admin?.isAdmin || !adminCan(admin as any, 'payments')) return NextResponse.json({ error: 'No tienes permiso para gestionar pagos' }, { status: 403 });
   const { userId, phase, paid } = await req.json();
   if (!(ACTIVE_PHASES as string[]).includes(phase)) return NextResponse.json({ error: 'Fase inválida' }, { status: 400 });
 
