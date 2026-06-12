@@ -32,10 +32,8 @@ export default function Admin() {
   useEffect(() => { load(); }, [load]);
 
   async function togglePay(userId: string, phase: string, paid: boolean) {
-    try {
-      const res = await api('/api/admin/phase-payment', { method: 'POST', body: JSON.stringify({ userId, phase, paid }) });
-      if (res?.pending) alert('Solicitud enviada al super admin para confirmar el desmarcado del pago.');
-    } catch (e: any) { alert(e.message); }
+    try { await api('/api/admin/phase-payment', { method: 'POST', body: JSON.stringify({ userId, phase, paid }) }); }
+    catch (e: any) { alert(e.message); }
     load();
   }
   async function saveResult(m: any, h: string, a: string, adv: string | null) {
@@ -145,7 +143,7 @@ export default function Admin() {
 
       <div className="panel">
         <h4>💵 Pagos por fase ($5 c/u)</h4>
-        <div className="desc">Marca quién pagó cada fase. Verde = pagó.{!isSuper && ' Para desmarcar un pago se enviará una solicitud al super admin.'}</div>
+        <div className="desc">Marca quién pagó cada fase. Verde = pagó. Toca de nuevo para desmarcar.</div>
         <div className="pay-grid-head">
           <span>Jugador</span>
           {phases.map((p) => <span key={p.phase} className="pgh">{SHORT[p.phase]}</span>)}
