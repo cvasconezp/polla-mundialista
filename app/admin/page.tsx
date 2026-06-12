@@ -18,7 +18,7 @@ function waNumber(phone: string): string {
 }
 function waLink(u: any): string {
   const name = (u.name ?? '').split(' ')[0] || '';
-  const msg = `¡Hola ${name}! 👋 Bienvenido/a a la Polla Mundialista 2026. ¡Mucha suerte con tus pronósticos! 🍀⚽\n\nÚnete al grupo de WhatsApp para los avisos y la coordinación: ${WA_GROUP}`;
+  const msg = `\u00a1Hola ${name}! \u{1F44B}\u26BD\uFE0F Bienvenido/a a la Polla Mundialista 2026. \u00a1Mucha suerte con tus pron\u00f3sticos! \u{1F340}\u{1F3C6}\u{1F525} \u00danete al grupo de WhatsApp para los avisos y la coordinaci\u00f3n: ${WA_GROUP}`;
   return `https://wa.me/${waNumber(u.phone)}?text=${encodeURIComponent(msg)}`;
 }
 

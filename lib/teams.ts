@@ -12,7 +12,7 @@ export const TEAM_INFO: Record<string, [string, string]> = {
   POR: ['Portugal', 'pt'], NED: ['Países Bajos', 'nl'], BEL: ['Bélgica', 'be'], ITA: ['Italia', 'it'],
   CRO: ['Croacia', 'hr'], SUI: ['Suiza', 'ch'], AUT: ['Austria', 'at'], SWE: ['Suecia', 'se'],
   NOR: ['Noruega', 'no'], DEN: ['Dinamarca', 'dk'], POL: ['Polonia', 'pl'], SRB: ['Serbia', 'rs'],
-  TUR: ['Turquía', 'tr'], SCO: ['Escocia', 'gb-sct'], WAL: ['Gales', 'gb-wls'], CZE: ['Chequia', 'cz'],
+  TUR: ['Turquía', 'tr'], SCO: ['Escocia', 'gb-sct'], WAL: ['Gales', 'gb-wls'], CZE: ['Rep\u00fablica Checa', 'cz'],
   BIH: ['Bosnia y Herzegovina', 'ba'], UKR: ['Ucrania', 'ua'], GRE: ['Grecia', 'gr'], ROU: ['Rumania', 'ro'],
   MAR: ['Marruecos', 'ma'], SEN: ['Senegal', 'sn'], CIV: ['Costa de Marfil', 'ci'], GHA: ['Ghana', 'gh'],
   NGA: ['Nigeria', 'ng'], CMR: ['Camerún', 'cm'], EGY: ['Egipto', 'eg'], ALG: ['Argelia', 'dz'],
