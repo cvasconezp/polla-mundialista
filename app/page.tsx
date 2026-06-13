@@ -30,8 +30,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [hint, setHint] = useState<number | null>(null);
   const [openDays, setOpenDays] = useState<Set<string>>(new Set());
-  const [pay, setPay] = useState<{ paidPhases: string[]; phases: { phase: string; label: string }[] }>({ paidPhases: [], phases: [] });
-  const [payOpen, setPayOpen] = useState(false);
   const activeRef = useRef<HTMLDivElement>(null);
   const scrolledRef = useRef(false);
 
@@ -74,7 +72,6 @@ export default function Home() {
     try {
       const [p, lb] = await Promise.all([api('/api/predictions'), api('/api/leaderboard')]);
       setMatches(p.matches);
-      setPay({ paidPhases: p.paidPhases ?? [], phases: p.phases ?? [] });
       const myId = (session?.user as any)?.id;
       const g = lb.general?.standings ?? [];
       const idx = g.findIndex((s: any) => s.userId === myId);
@@ -146,8 +143,6 @@ export default function Home() {
   return (
     <Shell head={head}>
       <div className="sec-title">Mis predicciones</div>
-      <button className="cal-btn" onClick={() => setPayOpen(true)}>💵 Pagos y datos de cuenta</button>
-      {payOpen && <PayModal onClose={() => setPayOpen(false)} phases={pay.phases} paidPhases={pay.paidPhases} playerName={session?.user?.name ?? ''} isAdmin={isAdminUser} />}
       {isAdminUser ? (
         <div className="pay-banner">👑 <b>Eres organizador.</b> Puedes ver los partidos y las tablas, pero no participas en la polla: no pronosticas, no pagas y no cuentas como jugador.</div>
       ) : matches.some((m) => m.status === 'SCHEDULED' && !m.paidPhase) && (
@@ -203,42 +198,5 @@ function ScoreBox({ def, disabled, onSave, pairId, side }:
         const other = (document.querySelector(`[data-pair="${pairId}"][data-side="${side === 'h' ? 'a' : 'h'}"]`) as HTMLInputElement)?.value ?? '';
         onSave(e.target.value, other);
       }} />
-  );
-}
-
-function PayModal({ onClose, phases, paidPhases, playerName, isAdmin }:
-  { onClose: () => void; phases: { phase: string; label: string }[]; paidPhases: string[]; playerName: string; isAdmin: boolean }) {
-  const num = '593981442865';
-  const msg = `Hola, te envío el comprobante de pago de la Polla Mundialista 2026.${playerName ? ' Jugador: ' + playerName : ''}`;
-  const waUrl = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
-  return (
-    <div className="cal-overlay" onClick={onClose}>
-      <div className="cal-sheet" onClick={(e) => e.stopPropagation()}>
-        <h3>💵 Pagos por fase</h3>
-        {isAdmin ? (
-          <p>Eres organizador, no participas en la polla. Estos son los datos de pago que usan los jugadores para abonar cada fase ($5 c/u) y enviar el comprobante.</p>
-        ) : (
-          <p>Cada fase cuesta $5. Aquí ves qué fases tienes pagadas. Para jugar una fase, realiza el pago y envía el comprobante; el organizador la habilita.</p>
-        )}
-        {!isAdmin && phases.map((p) => {
-          const paid = paidPhases.includes(p.phase);
-          return (
-            <div key={p.phase} className="pay-row">
-              <span className="nm">{p.label}</span>
-              <span style={{ fontWeight: 700, fontSize: 12, color: paid ? 'var(--green)' : 'var(--red)' }}>{paid ? '✓ Pagado' : 'Pendiente'}</span>
-            </div>
-          );
-        })}
-        <div style={{ background: 'var(--soft)', border: '1px solid var(--line)', borderRadius: 10, padding: '11px 13px', margin: '12px 0', fontSize: 13, lineHeight: 1.6 }}>
-          <b>Datos para el pago</b><br />
-          Banco Pichincha · Cuenta de ahorros<br />
-          N.º <b>2207078855</b><br />
-          Víctor Hugo Sánchez Chicaiza
-        </div>
-        <a className="cal-opt" href={waUrl} target="_blank" rel="noopener noreferrer"><span>💬</span> Enviar comprobante por WhatsApp</a>
-        <p className="cal-tip">Envía tu comprobante al +593 98 144 2865. Cuando el organizador confirme tu pago, se habilitan tus pronósticos de esa fase.</p>
-        <button className="cal-close" onClick={onClose}>Cerrar</button>
-      </div>
-    </div>
   );
 }
