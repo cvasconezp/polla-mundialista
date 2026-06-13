@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { currentUser } from '@/lib/session';
 import { isPredictionOpen } from '@/lib/scoring';
+import { ACTIVE_PHASES, PHASE_LABEL } from '@/lib/phases';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +34,8 @@ export async function GET() {
         ? { homeScore: byMatch[m.id].homeScore, awayScore: byMatch[m.id].awayScore, advancingCode: byMatch[m.id].advancingCode, points: byMatch[m.id].points }
         : null,
     })),
+    paidPhases: Array.from(paidPhases),
+    phases: ACTIVE_PHASES.map((p) => ({ phase: p, label: PHASE_LABEL[p] })),
   });
 }
 
